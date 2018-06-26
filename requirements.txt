@@ -1,0 +1,11 @@
+sqlalchemy==1.2.7
+flask==0.12.3
+flask-yoloapi==0.1.4
+flask_session
+flask-login
+flask-bcrypt
+redis
+gunicorn
+psycopg2
+markdown2
+requests

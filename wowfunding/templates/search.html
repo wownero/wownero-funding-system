@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <span class="form-text text-muted" style="margin-top: -2px;">
+                Results for '{{key}}'
+            </span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-8">
+            {% if results %}
+                <table class="table table-proposal table-hover" style="margin-bottom:6px;">
+                    <tbody>
+                        {% for p in results %}
+                        <tr>
+                            <td><b><a href="/proposal/{{ p.id }}">{{ p.headline }}</a></b></td>
+                            <td><a href="/user/{{ p.user.username }}">{{ p.user.username }}</a></td>
+                            <td>{{ p.date_added.strftime('%Y-%m-%d') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+            No search results.
+            {% endif %}
+        </div>
+
+        {% include 'sidebar.html' %}
+
+    </div>
+
+    <br>
+
+</div>
+<!-- /.container -->
+{% endblock %}

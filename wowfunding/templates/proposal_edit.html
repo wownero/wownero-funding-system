@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Page Content -->
+
+<div class="container">
+    {% if logged_in %}
+        {% if proposal %}
+            {% set headline = proposal.headline %}
+            {% set content = proposal.content %}
+            {% set date_added = proposal.date_added.strftime('%Y-%m-%d') %}
+            {% set pid = proposal.id %}
+            {% set funds_target = proposal.funds_target %}
+            {% set addr_receiving = proposal.addr_receiving if proposal.addr_receiving else '' %}
+        {% else %}
+            {% set headline = '' %}
+            {% set content = '' %}
+            {% set date_added = '' %}
+            {% set pid = '' %}
+            {% set funds_target = '' %}
+            {% set addr_receiving = '' %}
+        {% endif %}
+
+        <div class="row">
+            <!-- Post Content Column -->
+            <div class="col-lg-8">
+                <h2 style="padding-top:0">Add proposal</h2>
+
+                <p style="padding-top:0">
+                    This page allows you to add your funding proposal. Some help:
+                </p>
+
+                <ol>
+                    <li>Proposals are written in Markdown format. Use the HTML preview functionality of the editor.</li>
+                    <li>Introduce yourself, investors would like to know who they are funding</li>
+                    <li>Try to seek out community approval for your idea(s) before submitting a request</li>
+                    <li>Keep it short and clean</li>
+                    <li>Good luck!</li>
+                </ol>
+
+                <form id="news_post" role="form" lpformnum="2" _lpchecked="1" onsubmit="return false;">
+                    {% if pid %}
+                        <input style="display:none" name="pid" value="{{pid}}">
+                    {% endif %}
+
+                    <!-- text input -->
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input id="title" type="text" name="title" class="form-control" placeholder="Title" value="{{ headline }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Proposal Date</label>
+                        <input type="text" class="form-control" value="{{ date_added }}" disabled="">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Target <small>(In WOW)</small></label>
+                        <input {% if funds_target %}disabled{% endif %} id="funds_target" type="text" name="funds_target" class="form-control" placeholder="Target" value="{{ funds_target }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Receiving address for withdrawals <small>(WOW address)</small></label>
+                        <input {% if addr_receiving %}disabled{% endif %} id="addr_receiving" type="text" name="addr_receiving" class="form-control" placeholder="WOW..." value="{{ addr_receiving }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Content</label>
+                        <textarea id="content" class="textarea" name="content" placeholder="Place some text here" style="width: 100%; height: 600px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;">{{ content }}</textarea>
+                    </div>
+
+                    <div style="display:none" id="error" class="alert alert-danger">
+
+                    </div>
+
+                    <div class="form-group">
+                        <button onclick="submit_proposal();" type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+
+            {% include 'sidebar.html' %}
+        </div>
+    <!-- /.row -->
+    {% else %}
+        <div class="row">
+            <!-- Post Content Column -->
+            <div class="col-lg-8">
+                To submit your proposal, <a href="/login">login</a> or <a href="/register">register</a>.
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- /.container -->
+
+    <script>
+        var pid = {{pid or 'null'}};
+        var simplemde = new SimpleMDE({
+            element: document.getElementById("content"),
+            spellChecker: false
+        });
+
+        function submit_proposal() {
+            function error(msg){
+                var error_div = document.getElementById("error");
+                error_div.style.display = "block";
+                error_div.innerHTML = "Error: " + msg;
+            }
+
+            function success(data){
+                var data = JSON.parse(data);
+                window.location.href = data.url;
+            }
+
+            var data = {
+                'title': document.getElementById('title').value,
+                'content': simplemde.value(),
+                'funds_target': parseFloat(document.getElementById('funds_target').value),
+                'addr_receiving': document.getElementById('addr_receiving').value
+            };
+
+            if (pid) {
+                data.pid = pid;
+            }
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/proposal/add', true);
+            xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        success(xhr.responseText);
+                    } else {
+                        error(xhr.responseText);
+                    }
+                }
+            };
+
+            xhr.onerror = function () {
+                error(xhr.responseText);
+            };
+
+            xhr.send(JSON.stringify(data));
+
+        }
+
+
+    </script>
+
+{% endblock %}

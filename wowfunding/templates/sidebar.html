@@ -1,0 +1,80 @@
+{% if not status %}
+    {% set status = 0 %}
+{% endif %}
+
+<!-- Sidebar Widgets Column -->
+<div class="col-md-4">
+
+    <!-- Search Widget -->
+    <div class="card my-4" style="margin-top: 0 !important;">
+        <h5 style="transform: rotate(-0.4deg);" class="card-header">Search</h5>
+        <div class="card-body">
+            <div class="input-group">
+                <input id="search_input" type="text" class="form-control" placeholder="Search for..." value="{% if key %}{{key}}{% endif %}">
+                <span class="input-group-btn">
+                    <button onclick="do_search()" style="border-top-left-radius: 0px;border-bottom-left-radius: 0px;" class="btn btn-primary" type="button">
+                        Go!
+                    </button>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories Widget -->
+    <div class="card my-4">
+        <h5 style="transform: rotate(0.6deg);" class="card-header">Categories</h5>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-6">
+                    <ul class="list-unstyled mb-0">
+                        <li>
+                            <a href="{{ url_for('proposals', status=status, cat="wallets") }}">Wallets <small>({{summary_data['cats']['wallets']}})</small></a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('proposals', status=status, cat="core") }}">Core <small>({{summary_data['cats']['core']}})</small></a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('proposals', status=status, cat="marketing") }}">Marketing <small>({{summary_data['cats']['marketing']}})</small></a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-lg-6">
+                    <ul class="list-unstyled mb-0">
+                        <li>
+                            <a href="{{ url_for('proposals', status=status, cat="misc") }}">Misc <small>({{summary_data['cats']['misc']}})</small></a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('proposals', status=status, cat="design") }}">Design <small>({{summary_data['cats']['design']}})</small></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Side Widget -->
+    <div class="card my-4">
+        <h5 class="card-header">Cool widget</h5>
+        <div class="card-body">
+            Many widgets. Such sidebar. Wow.
+        </div>
+    </div>
+
+    <script>
+        var search_input = document.getElementById("search_input");
+
+        function do_search(){
+            var url = '{{url_for('search')}}?key=' + search_input.value;
+            location.replace(url);
+        }
+
+        search_input.addEventListener("keyup", function(event) {
+            event.preventDefault();
+            if (event.keyCode === 13) {
+                do_search();
+            }
+        });
+
+
+    </script>
+</div>

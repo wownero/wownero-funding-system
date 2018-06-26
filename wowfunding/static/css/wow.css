@@ -1,0 +1,354 @@
+body {
+    padding-top: 54px;
+}
+
+@media (min-width: 992px) {
+    body {
+        padding-top: 56px;
+    }
+}
+
+.container>div:first-child {
+    padding-top: 40px;
+}
+
+.mb-4, .my-4{
+    margin-top:0 !important;
+}
+
+.mt-4, .my-4 {
+    margin-top: 0rem !important;
+}
+
+.proposal-info-table td {
+    padding: .35rem !important;
+}
+
+.proposal_address {
+    white-space: pre-wrap;
+    padding: 2px;
+    border-radius: 2px;
+    margin-top: 6px;
+    font-weight: bold;
+    color: #ff0000;
+    font-size: 22px;
+}
+
+.proposal_content blockquote {
+    background-color: #efefef;
+    padding: 8px;
+}
+
+.proposal_content h1, .proposal_content h2, .proposal_content h3, .proposal_content h4{
+    margin-bottom: 16px;
+    margin-top: 16px;
+}
+
+.proposal_content p {
+    margin-bottom: 0.5rem;
+}
+
+.proposal_content img {
+    width: 100%;
+}
+
+.proposal_content code {
+    background: #ebebeb;
+    padding: 2px;
+}
+
+.table td, .table th {
+    padding: 0.35rem;
+}
+
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  margin-bottom: 60px; /* Margin bottom by footer height */
+  font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif;
+  background-image: url("/static/bg.png");
+  background-repeat: repeat;
+}
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 60px; /* Set the fixed height of the footer here */
+  line-height: 60px; /* Vertically center the text there */
+  background-color: #f5f5f5;
+}
+
+.bg-dark {
+    background: linear-gradient(90deg, #d253c8, #ffa93e);
+}
+
+.navbar-dark .navbar-brand {
+    color: #fff;
+    font-size: 18pt;
+    text-shadow: 2px 2px #667ff952;
+    font-family: "Comic Sans MS", "Comic Sans", cursive;
+}
+
+.table-proposal td {
+    font-size: 15px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0,0,0,.075);
+}
+
+.table th, .table td {
+    border-top: 1px solid #008926;
+    padding-top: .4rem;
+}
+
+.table-tilted{
+    -ms-transform: rotate(0.5deg);
+    -webkit-transform: rotate(0.5deg);
+    transform: rotate(0.5deg);
+}
+
+.table-tilted-v{
+    -ms-transform: rotate(-0.2deg);
+    -webkit-transform: rotate(-0.2deg);
+    transform: rotate(-0.2deg);
+}
+
+.table-no-header thead{
+    display: none;
+}
+
+.table-wow{
+    background-image: url(https://wownero.win/static/game-table-bg.png);
+    background-size: cover;
+}
+
+.table a{
+    color: #006400;
+}
+
+.table thead th {
+    border-bottom: 1px solid #008926 !important;
+    border-top: none;
+}
+
+.table tbody td{
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+    color: #495057;
+    background-color: #fff;
+    border-left-color: #008926;
+    border-left-width: 2px;
+    border-top-color: #008926;
+    border-top-width: 1px;
+    border-right-color: #008926;
+    border-right-width: 1px;
+}
+
+.nav-tabs .nav-link {
+    border: 1px solid transparent;
+    border-top-left-radius: .25rem;
+    border-top-right-radius: .25rem;
+    border-bottom-color: #008926;
+}
+
+.nav-tabs .nav-link:focus, .nav-tabs .nav-link:hover {
+    border-color: #e9ecef #e9ecef #dee2e6;
+}
+
+.nav-tabs .nav-link:focus, .nav-tabs .nav-link:hover {
+    border-color: #00892630 #00892630 #008926;
+}
+
+a {
+    color: #008926;
+}
+
+.btn-group-toggle a{
+    color: white;
+}
+
+.btn-group-toggle a:hover{
+     text-decoration: none;
+}
+
+.btn-primary{
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-primary:hover{
+    color: #fff;
+    background-color: #1e7e34;
+    border-color: #1c7430;
+}
+
+.card-body {
+    background-color: #00000008;
+}
+
+.card {
+    background-color: #ffffff00;
+    border: 0px solid rgba(0,0,0,.125);
+    border-radius: .25rem;
+}
+
+.card-header {
+    padding: .75rem 1.25rem;
+    margin-bottom: 0;
+    background-color: rgba(0,0,0,.03);
+    background: linear-gradient(90deg, #d253c829, #ffa93e69);
+    /*background: linear-gradient(90deg, #40d61e1f, #ffa93e69);*/
+    border-radius: calc(.25rem - 1px) calc(.25rem - 1px) 0 0;
+    border-bottom: 1px solid #e6e6e6;
+    border-bottom: 0px;
+}
+
+.proposal_content{
+    background-color: #00000008;
+    padding: .75rem 1.25rem;
+}
+
+.form-control {
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #008926;
+}
+
+/*fuku chrome*/
+input {
+ outline:none;
+}
+input:focus {
+    outline: 0;
+}
+*:focus {
+outline: none;
+}
+input[type="text"], textarea {
+outline: none;
+box-shadow:none !important;
+border: 1px solid #008926 !important;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: white;
+}
+
+nav .nav-link{
+    color: white;
+}
+
+nav .nav-link .active{
+    text-shadow: none;
+}
+
+.proposal-info-table td{
+    border-top: 0;
+}
+
+
+.proposal-info-table td span.badge{
+    font-size:20px;
+}
+
+.table-proposal .progress {
+    max-width: 70px !important;
+    min-width: 50px !important;
+    float:right;
+}
+
+.table-proposal .progress-bar {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -ms-flex-pack: center;
+    justify-content: center;
+    color: #fff;
+    text-shadow: 1px 1px #000000;
+    text-align: center;
+    white-space: nowrap;
+    background-color: #009845;
+    transition: width .6s ease;
+    font-family: monospace;
+    padding: 6px;
+}
+
+#point-wow-left{
+    float: right;
+}
+
+@media only screen and (max-width: 600px) {
+    .proposal-info-table tr:first-child>td, .proposal-info-table tr:first-child>td>span {
+        font-size: 28px !important;
+        font-weight: 100;
+    }
+
+    .navbar-dark .navbar-brand {
+        font-size: 13pt;
+    }
+
+    .proposal-info-table tr:first-child>td, .proposal-info-table tr:first-child>td>span {
+        font-size: 14px !important;
+    }
+
+    .proposal-info-table td span.badge {
+        font-size: 14px;
+    }
+
+    .proposal_content {
+        background-color: #00000008;
+        padding: 0.1rem 0.75rem;
+    }
+
+    .card-body{
+        padding: 0.5rem;
+    }
+
+    #point-wow-left{
+        display: none;
+    }
+
+    .table-proposal thead th#date, .table-proposal tbody td#date{
+        display: none;
+    }
+
+    .table-proposal, .table-proposal td{
+        font-size:14px !important;
+    }
+
+    .navbar-brand {
+        display: none;
+    }
+
+    .navbar-brand-mobile{
+        display: block !important;
+        color: white;
+        font-size:14px;
+    }
+
+    pre.proposal_address{
+        font-size:14px;
+    }
+
+    label {
+        font-size:12px !important;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    #point-wow-left {
+        display: none;
+    }
+}

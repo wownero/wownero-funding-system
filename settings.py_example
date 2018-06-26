@@ -1,0 +1,35 @@
+import logging
+import socket
+import os
+
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DEBUG = True
+
+SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI', 'postgresql://postgres:@localhost/ffs')
+
+SESSION_COOKIE_NAME = os.environ.get('WOW_SESSION_COOKIE_NAME', 'wow_id')
+SESSION_PREFIX = os.environ.get('WOW_SESSION_PREFIX', 'session:')
+
+REDIS_HOST = os.environ.get('WOW_REDIS_HOST', '127.0.0.1')
+REDIS_PORT = int(os.environ.get('WOW_REDIS_PORT', 6379))
+REDIS_PASSWD = os.environ.get('WOW_REDIS_PASSWD', None)
+
+BIND_HOST = os.environ.get("WOW_BIND_HOST", "127.0.0.1")
+if not BIND_HOST:
+    raise Exception("WOW_BIND_HOST missing")
+BIND_PORT = os.environ.get("WOW_BIND_PORT", 5004)
+if not BIND_PORT:
+    raise Exception("WOW_BIND_PORT missing")
+
+HOSTNAME = os.environ.get("WOW_HOSTNAME", socket.gethostname())
+
+RPC_LOCATION = "http://127.0.0.1:45678/json_rpc"
+
+FUNDING_CATEGORIES = [
+    'wallets',
+    'marketing',
+    'core',
+    'misc',
+    'design'
+]

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <h3>About</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-8">
+            <hr>
+            <p>
+                A simple funding system made with:
+            </p>
+            <ul>
+                <li>Python 3.5+</li>
+                <li>Flask microframework</li>
+                <li>Postgres 9.5+</li>
+                <li>Redis</li>
+            </ul>
+            <p>
+                We do not keep access logs or install tracking cookies. All static resources (javascript/stylesheets/images) are self-hosted.
+            </p>
+            <p>
+                When you encounter problems; please visit #wownero on chat.freenode.org
+            </p>
+        </div>
+
+        {% include 'sidebar.html' %}
+
+    </div>
+
+    <br>
+
+</div>
+<!-- /.container -->
+{% endblock %}
