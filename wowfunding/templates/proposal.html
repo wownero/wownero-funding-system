@@ -17,7 +17,7 @@
             </p>
 
             <p>
-                {% if proposal.user.username == current_user.username %}
+                {% if proposal.user.username == current_user.username or current_user.admin %}
                     <a href="/proposal/{{proposal.id}}/edit">
                         <button type="button" class="btn btn-success btn-sm">Edit</button>
                     </a>
