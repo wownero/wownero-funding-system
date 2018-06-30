@@ -47,6 +47,24 @@ class User(base):
     def __repr__(self):
         return '<User %r>' % self.username
 
+    @classmethod
+    def add(cls, username, password, email):
+        from wowfunding.factory import db_session
+        from wowfunding.validation import val_username, val_email
+
+        try:
+            # validate incoming username/email
+            val_username(username)
+            val_email(email)
+
+            user = User(username, password, email)
+            db_session.add(user)
+            db_session.commit()
+            db_session.flush()
+            return user
+        except Exception as ex:
+            db_session.rollback()
+            raise
 
 class Proposal(base):
     __tablename__ = "proposals"
@@ -90,6 +108,8 @@ class Proposal(base):
         if category not in settings.FUNDING_CATEGORIES:
             raise Exception('wrong category')
         self.category = category
+
+
 
     @property
     def json(self):

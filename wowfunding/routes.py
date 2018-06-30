@@ -142,14 +142,16 @@ def register():
     if request.method == 'GET':
         return make_response(render_template('register.html'))
 
+    username = request.form['username']
+    password = request.form['password']
+    email = request.form['email']
+
     try:
-        user = User(request.form['username'], request.form['password'], request.form['email'])
-        db_session.add(user)
-        db_session.commit()
-        flash('User successfully registered')
+        user = User.add(username, password, email)
+        flash('Successfully registered. No confirmation email required. You can login!')
         return redirect(url_for('login'))
     except Exception as ex:
-        flash('Could not register user.')
+        flash('Could not register user: %s' % str(ex), 'error')
         return make_response(render_template('register.html'))
 
 

@@ -3,6 +3,8 @@
 <!-- Page Content -->
 
 <div class="container">
+    {% include 'messages.html' %}
+
     {% if logged_in %}
         {% if proposal %}
             {% set headline = proposal.headline %}
