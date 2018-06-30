@@ -18,6 +18,8 @@ class User(base):
     admin = sa.Column(sa.Boolean, default=False)
     proposals = relationship('Proposal', back_populates="user")
 
+    comments = relationship("Comment", back_populates="user")
+
     def __init__(self, username, password, email):
         from wowfunding.factory import bcrypt
         self.username = username
@@ -65,6 +67,7 @@ class User(base):
         except Exception as ex:
             db_session.rollback()
             raise
+
 
 class Proposal(base):
     __tablename__ = "proposals"
@@ -265,3 +268,48 @@ class Payout(base):
     @staticmethod
     def get_payouts(proposal_id):
         return db_session.query(Payout).filter(Payout.proposal_id == proposal_id).all()
+
+
+class Comment(base):
+    __tablename__ = "comments"
+    id = sa.Column(sa.Integer, primary_key=True)
+
+    user_id = sa.Column(sa.Integer, sa.ForeignKey('users.user_id'), nullable=False)
+    user = relationship("User", back_populates="comments")
+
+    message = sa.Column(sa.VARCHAR, nullable=False)
+    locked = sa.Column(sa.Boolean, default=False)
+
+    @classmethod
+    def add_comment(cls, user_id: int, message: str, message_id: int = None):
+        from flask.ext.login import current_user
+        from wowfunding.factory import db_session
+        if not message:
+            raise Exception("empty message")
+
+        if current_user.id != user_id and not current_user.admin:
+            raise Exception("no rights to add or modify this comment")
+
+        if not message_id:
+            comment = Comment(user_id=self.id)
+        else:
+            try:
+                user = db_session.query(User).filter(User.id == user_id).first()
+                if not user:
+                    raise Exception("no user by that id")
+                comment = next(c for c in self.comments if c.id == message_id)
+                if comment.locked and not current_user.admin:
+                    raise Exception("your comment has been locked/removed")
+            except StopIteration:
+                raise Exception("no message by that id")
+            except:
+                raise Exception("unknown error")
+        try:
+            comment.message = message
+            db_session.add(comment)
+            db_session.commit()
+            db_session.flush()
+        except:
+            db_session.rollback()
+            raise Exception("could not add comment")
+        return comment
