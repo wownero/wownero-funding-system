@@ -99,6 +99,8 @@ class Proposal(base):
     user_id = sa.Column(sa.Integer, sa.ForeignKey('users.user_id'))
     user = relationship("User", back_populates="proposals")
 
+    payouts = relationship("Payout", back_populates="proposal")
+
     def __init__(self, headline, content, category, user: User):
         if not headline or not content:
             raise Exception('faulty proposal')
@@ -228,3 +230,38 @@ class Proposal(base):
             Proposal.headline.ilike(key_ilike),
             Proposal.content.ilike(key_ilike)))
         return q.all()
+
+
+class Payout(base):
+    __tablename__ = "payouts"
+    id = sa.Column(sa.Integer, primary_key=True)
+
+    proposal_id = sa.Column(sa.Integer, sa.ForeignKey('proposals.id'))
+    proposal = relationship("Proposal", back_populates="payouts")
+
+    amount = sa.Column(sa.Integer, nullable=False)
+    to_address = sa.Column(sa.VARCHAR, nullable=False)
+
+    ix_proposal_id = sa.Index("ix_proposal_id", proposal_id)
+
+    @classmethod
+    def add(cls, proposal_id, amount, to_address):
+        # @TODO: validate that we can make this payout; check previous payouts
+        from flask.ext.login import current_user
+        if not current_user.admin:
+            raise Exception("user must be admin to add a payout")
+        from wowfunding.factory import db_session
+
+        try:
+            payout = Payout(propsal_id=proposal_id, amount=amount, to_address=to_address)
+            db_session.add(payout)
+            db_session.commit()
+            db_session.flush()
+            return payout
+        except Exception as ex:
+            db_session.rollback()
+            raise
+
+    @staticmethod
+    def get_payouts(proposal_id):
+        return db_session.query(Payout).filter(Payout.proposal_id == proposal_id).all()
