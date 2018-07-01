@@ -352,3 +352,11 @@ nav .nav-link .active{
         display: none;
     }
 }
+
+textarea.comment{
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-bottom: 6px;
+    width: 100%;
+    max-width: 600px;
+}
