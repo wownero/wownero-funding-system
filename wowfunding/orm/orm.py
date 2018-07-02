@@ -83,7 +83,7 @@ class Proposal(base):
     funds_target = sa.Column(sa.Float, nullable=False)
 
     # the FFS progress (cached)
-    funds_progress = sa.Column(sa.Float, nullable=False)
+    funds_progress = sa.Column(sa.Float, nullable=False, default=0)
 
     # the FFS withdrawal amount (paid to the author)
     funds_withdrew = sa.Column(sa.Float, nullable=False, default=0)
@@ -103,6 +103,7 @@ class Proposal(base):
     user = relationship("User", back_populates="proposals")
 
     payouts = relationship("Payout", back_populates="proposal")
+    comments = relationship("Comment", back_populates="proposal", lazy='select')
 
     def __init__(self, headline, content, category, user: User):
         if not headline or not content:
@@ -113,8 +114,6 @@ class Proposal(base):
         if category not in settings.FUNDING_CATEGORIES:
             raise Exception('wrong category')
         self.category = category
-
-
 
     @property
     def json(self):
@@ -133,14 +132,30 @@ class Proposal(base):
 
     @classmethod
     def find_by_id(cls, pid: int):
+        from wowfunding.factory import db_session
         q = cls.query
         q = q.filter(Proposal.id == pid)
         result = q.first()
         if not result:
             return
+
         # check if we have a valid addr_donation generated. if not, make one.
         if not result.addr_donation:
             Proposal.generate_donation_addr(result)
+
+        q = db_session.query(Comment)
+        q = q.filter(Comment.proposal_id == result.id)
+        q = q.filter(Comment.replied_to == None)
+        comments = q.all()
+
+        for c in comments:
+            q = db_session.query(Comment)
+            q = q.filter(Comment.proposal_id == result.id)
+            q = q.filter(Comment.replied_to == c.id)
+            _c = q.all()
+            setattr(c, 'comments', _c)
+
+        setattr(result, '_comments', comments)
         return result
 
     @property
@@ -274,14 +289,62 @@ class Comment(base):
     __tablename__ = "comments"
     id = sa.Column(sa.Integer, primary_key=True)
 
+    proposal_id = sa.Column(sa.Integer, sa.ForeignKey('proposals.id'))
+    proposal = relationship("Proposal", back_populates="comments")
+
     user_id = sa.Column(sa.Integer, sa.ForeignKey('users.user_id'), nullable=False)
     user = relationship("User", back_populates="comments")
 
+    date_added = sa.Column(sa.TIMESTAMP, default=datetime.now)
+
     message = sa.Column(sa.VARCHAR, nullable=False)
+    replied_to = sa.Column(sa.ForeignKey("comments.id"))
+
     locked = sa.Column(sa.Boolean, default=False)
 
+    ix_comment_replied_to = sa.Index("ix_comment_replied_to", replied_to)
+    ix_comment_proposal_id = sa.Index("ix_comment_proposal_id", proposal_id)
+
+    @staticmethod
+    def find_by_id(cid: int):
+        from wowfunding.factory import db_session
+        return db_session.query(Comment).filter(Comment.id == cid).first()
+
+    @staticmethod
+    def remove(cid: int):
+        from wowfunding.factory import db_session
+        from flask.ext.login import current_user
+        if current_user.id != user_id and not current_user.admin:
+            raise Exception("no rights to remove this comment")
+        comment = Comment.get(cid=cid)
+        try:
+            comment.delete()
+            db_session.commit()
+            db_session.flush()
+        except:
+            db_session.rollback()
+            raise
+
+    @staticmethod
+    def lock(cid: int):
+        from wowfunding.factory import db_session
+        from flask.ext.login import current_user
+        if not current_user.admin:
+            raise Exception("admin required")
+        comment = Comment.find_by_id(cid=cid)
+        if not comment:
+            raise Exception("comment by that id not found")
+        comment.locked = True
+        try:
+            db_session.commit()
+            db_session.flush()
+            return comment
+        except:
+            db_session.rollback()
+            raise
+
     @classmethod
-    def add_comment(cls, user_id: int, message: str, message_id: int = None):
+    def add_comment(cls, pid: int, user_id: int, message: str, cid: int = None, message_id: int = None):
         from flask.ext.login import current_user
         from wowfunding.factory import db_session
         if not message:
@@ -291,13 +354,21 @@ class Comment(base):
             raise Exception("no rights to add or modify this comment")
 
         if not message_id:
-            comment = Comment(user_id=self.id)
+            proposal = Proposal.find_by_id(pid=pid)
+            if not proposal:
+                raise Exception("no proposal by that id")
+            comment = Comment(user_id=user_id, proposal_id=proposal.id)
+            if cid:
+                parent = Comment.find_by_id(cid=cid)
+                if not parent:
+                    raise Exception("cannot reply to a non-existent comment")
+                comment.replied_to = parent.id
         else:
             try:
                 user = db_session.query(User).filter(User.id == user_id).first()
                 if not user:
                     raise Exception("no user by that id")
-                comment = next(c for c in self.comments if c.id == message_id)
+                comment = next(c for c in user.comments if c.id == message_id)
                 if comment.locked and not current_user.admin:
                     raise Exception("your comment has been locked/removed")
             except StopIteration:
