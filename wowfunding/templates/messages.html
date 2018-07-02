@@ -1,17 +1,15 @@
-{% with messages = get_flashed_messages() %}
+{% with messages = get_flashed_messages(with_categories=True) %}
 {% if messages %}
 <div class="row">
     <div class="col-lg-12">
         {% for message in messages %}
-            {% if message.category != 'error' %}
-                <div class="alert alert-success">
-                    {{ message }}
-                </div>
-            {% else %}
-                <div class="alert alert-danger">
-                    {{ message }}
-                </div>
-            {% endif %}
+            <div class="alert {% if message[0] != 'error' %}alert-success{% else %}alert-danger{% endif %}">
+                <img src="/static/doge_head.png" style="
+                    width: 64px;
+                    margin-right: 8px;
+                ">
+                {{ message[1] }}
+            </div>
         {% endfor %}
     </div>
 </div>

@@ -5,7 +5,7 @@ from flask_yoloapi import endpoint, parameter
 
 import settings
 from wowfunding.factory import app, db_session
-from wowfunding.orm.orm import Proposal, User
+from wowfunding.orm.orm import Proposal, User, Comment
 
 
 @app.route('/')
@@ -23,6 +23,44 @@ def proposal_add():
     if current_user.is_anonymous:
         return make_response(redirect(url_for('login')))
     return make_response(render_template(('proposal_edit.html')))
+
+
+@app.route('/proposal/comment', methods=['POST'])
+@endpoint.api(
+    parameter('pid', type=int, required=True),
+    parameter('text', type=str, required=True),
+    parameter('cid', type=int, required=False)
+)
+def proposal_comment(pid, text, cid):
+    if current_user.is_anonymous:
+        flash('not logged in', 'error')
+        return redirect(url_for('proposal', pid=pid))
+    if len(text) <= 3:
+        flash('comment too short', 'error')
+        return redirect(url_for('proposal', pid=pid))
+    try:
+        Comment.add_comment(user_id=current_user.id, message=text, pid=pid, cid=cid)
+    except Exception as ex:
+        flash('Could not add comment: %s' % str(ex), 'error')
+        return redirect(url_for('proposal', pid=pid))
+
+    flash('Comment posted.')
+    return redirect(url_for('proposal', pid=pid))
+
+
+@app.route('/proposal/<int:pid>/comment/<int:cid>')
+def propsal_comment_reply(cid, pid):
+    from wowfunding.orm.orm import Comment
+    c = Comment.find_by_id(cid)
+    if not c or c.replied_to:
+        return redirect(url_for('proposal', pid=pid))
+    p = Proposal.find_by_id(pid)
+    if not p:
+        return redirect(url_for('proposals'))
+    if c.proposal_id != p.id:
+        return redirect(url_for('proposals'))
+
+    return make_response(render_template('comment_reply.html', c=c, pid=pid, cid=cid))
 
 
 @app.route('/proposal/<int:pid>')

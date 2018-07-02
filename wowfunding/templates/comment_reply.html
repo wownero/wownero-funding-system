@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Page Content -->
+
+<div class="container" style="margin-bottom:140px;">
+    {% include 'messages.html' %}
+
+    <div class="row">
+
+        <!-- Post Content Column -->
+        <div class="col-lg-12">
+            <div class="proposal_content">
+                <!-- Post Content -->
+                <div class="media mb-4">
+                    <div class="votearrow" title="upvote"></div>
+                    <div class="media-body">
+                        <span class="username"><a href="/user/{{ c.user.username }}">{{c.user.username}}</a></span>
+                        <span class="date_posted">{{c.date_added.strftime('%Y-%m-%d %H:%M')}}</span><br>
+                        {{c.message}}
+                        <br><br>
+                        {% if logged_in %}
+                            <form method="post" action="{{url_for('proposal_comment')}}">
+                                <input type="hidden" name="pid" value="{{pid}}">
+                                <input type="hidden" name="cid" value="{{cid}}">
+                                <textarea class="comment" name="text" rows="6" cols="60"></textarea>
+                                <br><br><input type="submit" value="add comment">
+                            </form>
+                        {% else %}
+                            You need to be logged in to comment.
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- /.container -->
+{% endblock %}

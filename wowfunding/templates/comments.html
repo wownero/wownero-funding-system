@@ -1,63 +1,61 @@
 <div class="row">
     <div class="col-md-12">
         <div class="card my-6" id="incoming_txs">
-            <h5 class="card-header">Comments</h5>
+            <h5 id="comments" class="card-header">Comments</h5>
             <div class="card-body">
                 {% if logged_in %}
                     <form method="post" action="comment">
-                        <input type="hidden" name="proposal_id" value="{{proposal.id}}">
+                        <input type="hidden" name="pid" value="{{proposal.id}}">
                         <textarea class="comment" name="text" rows="6" cols="60"></textarea>
                         <br><br><input type="submit" value="add comment">
                     </form>
                 {% else %}
-                    You need to be logged in to comment.<br>
-                    Press <b>F</b> to pay respects.
+                    You need to be logged in to comment.
+                    <br>
                 {% endif %}
 
                 <br>
 
+                {% for c in proposal._comments %}
                 <!-- Single Comment -->
-                <div class="media mb-4">
-                    <img class="d-flex mr-3 rounded-circle" src="http://placehold.it/50x50" alt="">
+                <div class="media mb-4 comment-container" id="comment-{{c.id}}">
+                    <div class="votearrow" title="upvote"></div>
                     <div class="media-body">
-                        <h5 class="mt-0">Commenter Name</h5>
-                        Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin. Cras
-                        purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi
-                        vulputate fringilla. Donec lacinia congue felis in faucibus.
-                    </div>
-                </div>
+                        <span class="username">
+                            <a class="{% if c.user.username == proposal.user.username %}author{% endif %}" href="/user/{{ c.user.username }}">
+                                {{c.user.username}}
+                            </a>
+                        </span>
+                        <span class="date_posted">
+                            <a href="/proposal/{{proposal.id}}#comment-{{c.id}}">
+                                {{c.date_added.strftime('%Y-%m-%d %H:%M')}}
+                            </a>
+                        </span><br>
+                        {{c.message}}
+                        <br>
+                        <a class="reply" href="{{url_for('propsal_comment_reply', cid=c.id, pid=proposal.id)}}">reply</a>
 
-                <!-- Comment with nested comments -->
-                <div class="media mb-4">
-                    <img class="d-flex mr-3 rounded-circle" src="http://placehold.it/50x50" alt="">
-                    <div class="media-body">
-                        <h5 class="mt-0">Commenter Name</h5>
-                        Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin. Cras
-                        purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi
-                        vulputate fringilla. Donec lacinia congue felis in faucibus.
-
-                        <div class="media mt-4">
-                            <img class="d-flex mr-3 rounded-circle" src="http://placehold.it/50x50" alt="">
+                        {% for _c in c.comments %}
+                        <div class="media mt-4 comment-container" id="comment-{{_c.id}}">
+                            <div class="votearrow" title="upvote"></div>
                             <div class="media-body">
-                                <h5 class="mt-0">Commenter Name</h5>
-                                Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin.
-                                Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc
-                                ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
+                                <span class="username">
+                                    <a class="{% if c.user.username == proposal.user.username %}author{% endif %}" href="/user/{{ c.user.username }}">
+                                        {{_c.user.username}}
+                                    </a>
+                                </span>
+                                <span class="date_posted">
+                                    <a href="/proposal/{{proposal.id}}#comment-{{_c.id}}">
+                                        {{c.date_added.strftime('%Y-%m-%d %H:%M')}}
+                                    </a>
+                                </span><br>
+                                {{_c.message}}
                             </div>
                         </div>
-
-                        <div class="media mt-4">
-                            <img class="d-flex mr-3 rounded-circle" src="http://placehold.it/50x50" alt="">
-                            <div class="media-body">
-                                <h5 class="mt-0">Commenter Name</h5>
-                                Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin.
-                                Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc
-                                ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-                            </div>
-                        </div>
-
+                        {% endfor %}
                     </div>
                 </div>
+                {% endfor %}
             </div>
         </div>
     </div>
