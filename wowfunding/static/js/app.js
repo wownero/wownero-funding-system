@@ -10,3 +10,9 @@ function hideShow(element_id) {
         x.style.display = "none";
     }
 }
+
+function fix_anchors(){
+    if(window.location.hash) {
+        scrollBy(0, -150)
+    }
+}
