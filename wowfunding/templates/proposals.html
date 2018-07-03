@@ -36,9 +36,7 @@
     <div class="row">
         <div class="col-lg-8">
             {% if proposals %}
-            {% for p in proposals %}
-            {% if loop.index == 1 %}
-            <table class="table table-proposal table-hover table-tilted" style="margin-bottom:6px;">
+            <table class="table table-proposal table-hover" style="margin-bottom:6px;">
                 <thead>
                 <tr>
                     <th style="font-size: x-large;">Proposal</th>
@@ -49,33 +47,35 @@
                     {% else %}
                     <th></th>
                     {% endif %}
+                    <th style="display: table-cell;text-align: center;">
+                        <img width="24" src="/static/msg.png">
+                    </th>
                 </tr>
                 </thead>
                 <tbody>
-                {% else %}
-                {% if loop.index % 3 == 0 %}
-                </tbody>
-            </table>
-            <table class="table table-proposal table-hover {% if (loop.index/3) % 2 == 0 %}table-tilted{% else %}table-tilted-v{% endif %}">
-                <tbody>
-                {% endif %}
-                {% endif %}
-                <tr>
-                    <td><b><a href="/proposal/{{ p.id }}">{{ p.headline }}</a></b></td>
-                    <td><a href="/user/{{ p.user.username }}">{{ p.user.username }}</a></td>
-                    <td id="date"><small>{{ p.date_added.strftime('%Y-%m-%d %H:%M') }}</small></td>
-                    <td>
-                        <span style="float:right;">
-                        {% if p.funds_progress >= 0.1 and status == 0 %}
-                            {{p.funds_progress|int}}%
-                        {% else %}
-                        -
-                        {% endif %}
-                        </span>
-                    </td>
-                </tr>
-
-                {% endfor %}
+                    {% for p in proposals %}
+                    <tr>
+                        <td><b><a href="/proposal/{{ p.id }}">{{ p.headline }}</a></b></td>
+                        <td><a href="/user/{{ p.user.username }}">{{ p.user.username }}</a></td>
+                        <td id="date"><small>{{ p.date_added.strftime('%Y-%m-%d %H:%M') }}</small></td>
+                        <td>
+                            <span style="float:right;">
+                            {% if p.funds_progress >= 0.1 and status == 0 %}
+                                {{p.funds_progress|int}}%
+                            {% else %}
+                            -
+                            {% endif %}
+                            </span>
+                        </td>
+                        <td style="text-align:center;">
+                            {% if p.comment_count %}
+                                {{p.comment_count}}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
             {% else %}

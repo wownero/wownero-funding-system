@@ -143,20 +143,26 @@ class Proposal(base):
         if not result.addr_donation:
             Proposal.generate_donation_addr(result)
 
+        comment_count = db_session.query(sa.func.count(Comment.id)).filter(Comment.proposal_id == result.id).scalar()
+        setattr(result, 'comment_count', comment_count)
+        return result
+
+    def get_comments(self):
+        from wowfunding.factory import db_session
         q = db_session.query(Comment)
-        q = q.filter(Comment.proposal_id == result.id)
+        q = q.filter(Comment.proposal_id == self.id)
         q = q.filter(Comment.replied_to == None)
         comments = q.all()
 
         for c in comments:
             q = db_session.query(Comment)
-            q = q.filter(Comment.proposal_id == result.id)
+            q = q.filter(Comment.proposal_id == self.id)
             q = q.filter(Comment.replied_to == c.id)
             _c = q.all()
             setattr(c, 'comments', _c)
 
-        setattr(result, '_comments', comments)
-        return result
+        setattr(self, '_comments', comments)
+        return self
 
     @property
     def balance(self):
@@ -226,6 +232,7 @@ class Proposal(base):
 
     @classmethod
     def find_by_args(cls, status:int = None, cat: str = None, limit: int = 20, offset=0):
+        from wowfunding.factory import db_session
         if status is None or not status >= 0 or not status <= 2:
             raise NotImplementedError('missing status')
 
@@ -238,7 +245,12 @@ class Proposal(base):
         if isinstance(offset, int):
             q = q.offset(offset)
 
-        return q.all()
+        results = q.all()
+        for result in results:
+            comment_count = db_session.query(sa.func.count(Comment.id)).filter(
+                Comment.proposal_id == result.id).scalar()
+            setattr(result, 'comment_count', comment_count)
+        return results
 
     @classmethod
     def search(cls, key: str):

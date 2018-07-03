@@ -66,6 +66,7 @@ def propsal_comment_reply(cid, pid):
 @app.route('/proposal/<int:pid>')
 def proposal(pid):
     p = Proposal.find_by_id(pid=pid)
+    p.get_comments()
     if not p:
         return make_response(redirect(url_for('proposals')))
     return make_response(render_template(('proposal.html'), proposal=p))
