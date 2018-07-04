@@ -7,14 +7,18 @@ from wowfunding.orm.orm import Proposal, User
 
 
 @app.context_processor
-def template_vars():
+def templating():
     global summary_data
-    return dict(summary_data=summary_data[1])
+    from flask.ext.login import current_user
+    return dict(logged_in=current_user.is_authenticated,
+                current_user=current_user,
+                funding_categories=settings.FUNDING_CATEGORIES,
+                summary_data=summary_data[1])
 
 
-def fetch_summary():
+def fetch_summary(purge=False):
     global summary_data
-    if summary_data:
+    if summary_data and not purge:
         if (datetime.now() - summary_data[0]).total_seconds() <= 120:
             return
 

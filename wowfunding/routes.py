@@ -78,9 +78,10 @@ def proposal(pid):
     parameter('content', type=str, required=True, location='json'),
     parameter('pid', type=int, required=False, location='json'),
     parameter('funds_target', type=float, required=True, location='json'),
-    parameter('addr_receiving', type=str, required=True, location='json')
+    parameter('addr_receiving', type=str, required=True, location='json'),
+    parameter('category', type=str, required=True, location='json')
 )
-def proposal_api_add(title, content, pid, funds_target, addr_receiving):
+def proposal_api_add(title, content, pid, funds_target, addr_receiving, category):
     import markdown2
 
     if current_user.is_anonymous:
@@ -90,6 +91,9 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving):
         return make_response(jsonify('title too short'), 500)
     if len(content) <= 20:
         return make_response(jsonify('content too short'), 500)
+
+    if category and category not in settings.FUNDING_CATEGORIES:
+        return make_response(jsonify('unknown category'), 500)
 
     try:
         from wowfunding.bin.anti_xss import such_xss
@@ -111,6 +115,8 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving):
         p.html = html
         if addr_receiving:
             p.addr_receiving = addr_receiving
+        if category:
+            p.category = category
         p.last_edited = datetime.now()
     else:
         if funds_target <= 1:
@@ -123,10 +129,16 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving):
         p.last_edited = datetime.now()
         p.funds_target = funds_target
         p.addr_receiving = addr_receiving
+        p.category = category
         db_session.add(p)
 
     db_session.commit()
     db_session.flush()
+
+    # reset cached statistics
+    from wowfunding.bin import utils_request
+    utils_request.fetch_summary(purge=True)
+
     return make_response(jsonify({'url': url_for('proposal', pid=p.id)}))
 
 

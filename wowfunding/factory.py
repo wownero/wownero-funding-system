@@ -48,13 +48,6 @@ def create_app():
     app.session_interface = JsonRedis(key_prefix=app.config['SESSION_PREFIX'], use_signer=False)
     cache = WowCache()
 
-    # template vars
-    @app.context_processor
-    def _bootstrap_templating():
-        from flask.ext.login import current_user
-        return dict(logged_in=current_user.is_authenticated,
-                    current_user=current_user)
-
     # import routes
     from wowfunding import routes
     from wowfunding import api
