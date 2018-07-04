@@ -205,7 +205,7 @@ def proposals(status, page, cat):
         proposals = {
             'proposed': Proposal.find_by_args(status=1, limit=10),
             'funding': Proposal.find_by_args(status=2, limit=10),
-            'wip': Proposal.find_by_args(status=3, limit=4)}
+            'wip': Proposal.find_by_args(status=3, limit=5)}
         return make_response(render_template('proposal/overview.html', proposals=proposals))
 
     try:
