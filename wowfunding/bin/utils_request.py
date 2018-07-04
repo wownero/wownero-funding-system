@@ -13,6 +13,7 @@ def templating():
     return dict(logged_in=current_user.is_authenticated,
                 current_user=current_user,
                 funding_categories=settings.FUNDING_CATEGORIES,
+                funding_statuses=settings.FUNDING_STATUSES,
                 summary_data=summary_data[1])
 
 
@@ -24,7 +25,7 @@ def fetch_summary(purge=False):
 
     data = {}
     categories = settings.FUNDING_CATEGORIES
-    statuses = [0, 1, 2]
+    statuses = settings.FUNDING_STATUSES.keys()
 
     for cat in categories:
         q = db_session.query(Proposal)

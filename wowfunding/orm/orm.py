@@ -93,11 +93,12 @@ class Proposal(base):
     addr_receiving = sa.Column(sa.VARCHAR)
 
     # proposal status:
-    # -1: disabled
-    # 0: proposed
-    # 1: wip
-    # 2: completed
-    status = sa.Column(sa.INTEGER, default=0)
+    # 0: disabled
+    # 1: proposed
+    # 2: funding required
+    # 3: wip
+    # 4: completed
+    status = sa.Column(sa.INTEGER, default=1)
 
     user_id = sa.Column(sa.Integer, sa.ForeignKey('users.user_id'))
     user = relationship("User", back_populates="proposals")
@@ -140,12 +141,17 @@ class Proposal(base):
             return
 
         # check if we have a valid addr_donation generated. if not, make one.
-        if not result.addr_donation:
+        if not result.addr_donation and result.status >= 2:
             Proposal.generate_donation_addr(result)
 
-        comment_count = db_session.query(sa.func.count(Comment.id)).filter(Comment.proposal_id == result.id).scalar()
-        setattr(result, 'comment_count', comment_count)
         return result
+
+    @property
+    def comment_count(self):
+        from wowfunding.factory import db_session
+        q = db_session.query(sa.func.count(Comment.id))
+        q = q.filter(Comment.proposal_id == self.id)
+        return q.scalar()
 
     def get_comments(self):
         from wowfunding.factory import db_session
@@ -231,13 +237,16 @@ class Proposal(base):
             return addr_donation['address']
 
     @classmethod
-    def find_by_args(cls, status:int = None, cat: str = None, limit: int = 20, offset=0):
+    def find_by_args(cls, status: int = None, cat: str = None, limit: int = 20, offset=0):
         from wowfunding.factory import db_session
-        if status is None or not status >= 0 or not status <= 2:
-            raise NotImplementedError('missing status')
+        if isinstance(status, int) and status not in settings.FUNDING_STATUSES.keys():
+            raise NotImplementedError('invalid status')
+        if isinstance(cat, str) and cat not in settings.FUNDING_CATEGORIES:
+            raise NotImplementedError('invalid cat')
 
         q = cls.query
-        q = q.filter(Proposal.status == status)
+        if isinstance(status, int):
+            q = q.filter(Proposal.status == status)
         if cat:
             q = q.filter(Proposal.category == cat)
         q = q.order_by(Proposal.date_added.desc())
@@ -245,12 +254,7 @@ class Proposal(base):
         if isinstance(offset, int):
             q = q.offset(offset)
 
-        results = q.all()
-        for result in results:
-            comment_count = db_session.query(sa.func.count(Comment.id)).filter(
-                Comment.proposal_id == result.id).scalar()
-            setattr(result, 'comment_count', comment_count)
-        return results
+        return q.all()
 
     @classmethod
     def search(cls, key: str):

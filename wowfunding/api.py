@@ -10,7 +10,7 @@ from wowfunding.orm.orm import Proposal, User
 
 @app.route('/api/1/proposals')
 @endpoint.api(
-    parameter('status', type=int, location='args', default=0),
+    parameter('status', type=int, location='args', default=1),
     parameter('cat', type=str, location='args'),
     parameter('limit', type=int, location='args', default=20),
     parameter('offset', type=int, location='args', default=0)

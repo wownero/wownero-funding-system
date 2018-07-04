@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+{% from 'proposal/macros/table.html' import proposal_table %}
+
+<div class="container">
+    {% include 'proposal/macros/navbar.html' %}
+
+    <div class="row">
+        <div class="col-lg-8">
+            {% if proposals %}
+                {{ proposal_table(title='', _proposals=proposals) }}
+            {% else %}
+                No proposals here yet.
+            {% endif %}
+        </div>
+        {% include 'sidebar.html' %}
+    </div>
+
+    <br>
+
+</div>
+<!-- /.container -->
+{% endblock %}

@@ -1,5 +1,6 @@
 import logging
 import socket
+import collections
 import os
 
 
@@ -33,3 +34,12 @@ FUNDING_CATEGORIES = [
     'misc',
     'design'
 ]
+
+FUNDING_STATUSES = collections.OrderedDict()
+FUNDING_STATUSES[0] = 'disabled'
+FUNDING_STATUSES[1] = 'proposal'
+FUNDING_STATUSES[2] = 'funding'
+FUNDING_STATUSES[3] = 'wip'
+FUNDING_STATUSES[4] = 'completed'
+
+USER_REG_DISABLED = False

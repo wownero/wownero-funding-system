@@ -130,6 +130,7 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
         p.funds_target = funds_target
         p.addr_receiving = addr_receiving
         p.category = category
+        p.status = 1
         db_session.add(p)
 
     db_session.commit()
@@ -169,21 +170,30 @@ def user(name):
     user = q.first()
     return render_template('user.html', user=user)
 
-
 @app.route('/proposals')
 @endpoint.api(
-    parameter('status', type=int, location='args', default=0),
-    parameter('page', type=int, location='args'),
-    parameter('cat', type=str, location='args')
+    parameter('status', type=int, location='args', required=False),
+    parameter('page', type=int, location='args', required=False),
+    parameter('cat', type=str, location='args', required=False)
 )
 def proposals(status, page, cat):
+    if not isinstance(status, int) and not isinstance(page, int) and not cat:
+        # no args, render overview
+        proposals = {
+            'proposed': Proposal.find_by_args(status=1, limit=10),
+            'funding': Proposal.find_by_args(status=2, limit=10),
+            'wip': Proposal.find_by_args(status=3, limit=4)}
+        return make_response(render_template('proposal/overview.html', proposals=proposals))
+
     try:
+        if not isinstance(status, int):
+            status = 1
         proposals = Proposal.find_by_args(status=status, cat=cat)
     except:
-        return make_response(redirect(url_for('proposals') + '?status=0'))
+        return make_response(redirect(url_for('proposals')))
 
-    return make_response(render_template('proposals.html', proposals=proposals, status=status, cat=cat))
-
+    return make_response(render_template('proposal/proposals.html',
+                                         proposals=proposals, status=status, cat=cat))
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():

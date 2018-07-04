@@ -99,6 +99,11 @@ body {
     font-size: 15px;
 }
 
+.table-proposal tbody td:first-child{
+    word-break: break-word;
+    width: 40%;
+}
+
 .table-hover tbody tr:hover {
     background-color: rgba(0,0,0,.075);
 }

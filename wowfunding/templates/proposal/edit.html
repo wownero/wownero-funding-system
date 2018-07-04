@@ -69,7 +69,7 @@
                         <label for="category">Category</label>
                         <select class="form-control" id="category" name="category">
                             {% for cat in funding_categories %}
-                                <option value="{{cat}}"{% if cat == proposal.category %} selected{% endif %}>{{cat}}</option>
+                                <option value="{{cat}}"{% if proposal and cat == proposal.category %} selected{% endif %}>{{cat}}</option>
                             {% endfor %}
                         </select>
                     </div>

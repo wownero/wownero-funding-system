@@ -1,5 +1,10 @@
-function clickDataHref(d){
-    window.location.href = d.getAttribute("data-href");
+function proposalNavbarclickDataHref(d){
+    if(d.classList.contains('active')){
+        // if the navbar button is already active, remove filter, go to proposals page
+        window.location.href = '/proposals'
+    } else {
+        window.location.href = d.getAttribute("data-href");
+    }
 }
 
 function hideShow(element_id) {
