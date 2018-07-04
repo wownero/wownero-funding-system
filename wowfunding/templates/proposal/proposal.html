@@ -31,6 +31,12 @@
                     Completed
                 {% endif %}
                 </span>
+                {% if proposal.status <= 1 %}
+                <br>
+                <span>
+                    Target: <b>{{proposal.funds_target|round}}</b> WOW
+                </span>
+                {% endif %}
             </p>
 
             <p>
