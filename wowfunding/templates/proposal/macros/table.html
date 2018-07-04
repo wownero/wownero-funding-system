@@ -23,7 +23,7 @@
                 <td id="date"><small>{{ p.date_added.strftime('%Y-%m-%d %H:%M') }}</small></td>
                 <td>
                     <span style="float:right;">
-                    {% if p.funds_progress >= 0.1 and status == 0 %}
+                    {% if p.funds_progress >= 0.1 and p.status >= 2 %}
                         {{p.funds_progress|int}}%
                     {% else %}
                     -
