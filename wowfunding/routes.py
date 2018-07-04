@@ -18,11 +18,17 @@ def about():
     return make_response(render_template('about.html'))
 
 
+@app.route('/proposal/add/disclaimer')
+def proposal_add_disclaimer():
+    return make_response(render_template(('proposal/disclaimer.html')))
+
+
 @app.route('/proposal/add')
 def proposal_add():
     if current_user.is_anonymous:
         return make_response(redirect(url_for('login')))
-    return make_response(render_template(('proposal/edit.html')))
+    default_content = settings.PROPOSAL_CONTENT_DEFAULT
+    return make_response(render_template('proposal/edit.html', default_content=default_content))
 
 
 @app.route('/proposal/comment', methods=['POST'])

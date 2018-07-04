@@ -85,7 +85,7 @@
 
                     <div class="form-group">
                         <label>Content</label>
-                        <textarea id="content" class="textarea" name="content" placeholder="Place some text here" style="width: 100%; height: 600px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;">{{ content }}</textarea>
+                        <textarea id="content" class="textarea" name="content" placeholder="Place some text here" style="width: 100%; height: 600px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;">{% if content %}{{ content }}{% else %}{{default_content}}{% endif %}</textarea>
                     </div>
 
                     <div style="display:none" id="error" class="alert alert-danger">

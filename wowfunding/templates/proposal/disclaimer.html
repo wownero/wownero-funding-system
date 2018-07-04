@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .container>.row>div{
+        margin-bottom:10px;
+    }
+</style>
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="alert alert-danger">
+                <img src="/static/doge_head.png" style="
+                    width: 64px;
+                    margin-right: 8px;
+                ">
+                <p style="margin-top:10px;margin-bottom:0px;">
+                <b>The Wownero Funding System maintains standardized rules for proposal submission.</b>
+                Please read the following disclaimer carefuly before submitting yours.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">WFS length</h5>
+                    <p class="card-text">
+                        Tasks should be capable being completed within <b>90 days</b> of the proposal reaching the target funding unless the proposal is a bounty.
+                    </p>
+                    <p>
+                        Having indefinite, open-ended tasks could lead to <b>mission creep</b> and expanded completion time, which is not ideal because the value of WOW could become volatile.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Measurable Outcome(s)</h5>
+                    <p class="card-text">
+                        Proposals should have an <b>objectively measurable outcome</b>, not aspirational.
+                    </p>
+                    <p>
+                        A WFS should make the Wownero network stronger, raising liquidity, or attracting more developers/community members.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Estimated costs</h5>
+                    <p class="card-text">
+                        Proposals should break down estimated costs per item and number of hours for labor per task.
+                    </p>
+                    <p>
+                        <b>The costs should be comparable to the fair market value at the time the proposal is made</b>.
+                        The exchange rates are based on the prevailing price of WOW and BTC on TradeOgre and CoinMarketCap.
+                    </p>
+                    <p>
+                        A 10% premium above costs may be added to take into account of volatility.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Unwanted marketing</h5>
+                    <p class="card-text">
+                        A donation address <b>should not</b> be included in the proposal that would bypass the WFS mechanism.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Inactivity</h5>
+                    <p class="card-text">
+                        If a proposal is partially completed by one developer that subsequentlay abandons the project,
+                        <b>another developer can take up any outstanding milestones</b>. Developers will be compensated
+                        in proportion with the work that has been completed. A proposal is considered abandoned if
+                        the developer is MIA for more than 60 days.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Headstart</h5>
+                    <p class="card-text">
+                        A proposal can begin before it's fully funded.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Early payouts</h5>
+                    <p class="card-text">
+                        Developers can be paid for completed milestones <b>before</b> a proposal is fully funded.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Failed to raise funds</h5>
+                    <p class="card-text">
+                        If a proposal has not been fully funded within 60 days, the proposal may be cancelled and
+                        <b>any amount raised automatically transferred to the general development fund</b>. However, if a
+                        developer has taken on a milestone, the proposal may remain open unless it is later considered abandoned.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Failed to raise funds</h5>
+                    <p class="card-text">
+                        Minor amendments may be made to proposals <b>as long it is within the general spirit of the original
+                        proposal</b>. However, for major changes, the developer should bring up the proposed change on IRC and
+                        open a meta issue. There should be a rough consensus for accepting major changes to proposals.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Review</h5>
+                    <p class="card-text">
+                        Before a proposal is moved to 'Seeking Funding' status, <b>an administrator will review the proposal</b>
+                        to ensure it is sufficiently detailed and it meets the basic requirements of the WFS Rules. An
+                        administrator may ask the developer to clarify ideas or break up tasks into multiple milestones.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">License</h5>
+                    <p class="card-text">
+                        Any software funded by WFS will be <b>open sourced under a MIT license</b> authored by the Wownero Project.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="margin-bottom: 160px;margin-top:20px;">
+        <div class="col-md-6">
+            <div class="form-group">
+                <a href="/proposal/add">
+                    <button class="btn btn-primary">Yes yes, I understand.</button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</div>
+<!-- /.container -->
+{% endblock %}

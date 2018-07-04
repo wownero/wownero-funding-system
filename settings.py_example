@@ -43,3 +43,29 @@ FUNDING_STATUSES[3] = 'wip'
 FUNDING_STATUSES[4] = 'completed'
 
 USER_REG_DISABLED = False
+
+PROPOSAL_CONTENT_DEFAULT = """
+#### Why?
+
+What problem(s) are you trying to solve?
+
+#### How much?
+
+What is the total cost in WOW? List expenses per item. Total hours of work and per hour rate. What exchange rates are you using?
+
+#### What?
+
+Describe your idea in detail.
+
+#### Milestones?
+
+Break down tasks into different stages. Each stage should have the estimated number of days/weeks needed and cost per stage.
+
+#### Outcomes?
+
+What will be delivered? What goals will be reached?
+
+#### Why you?
+
+What skills and experience do you have?
+""".strip()
