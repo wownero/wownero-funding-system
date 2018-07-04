@@ -1,0 +1,44 @@
+{% macro proposal_table(title, _proposals) %}
+    <table class="table table-proposal table-hover" style="margin-bottom:6px;">
+        <thead>
+        <tr>
+            <th style="font-size: x-large;">{{title}}</th>
+            <th>Username</th>
+            <th id="date">Date</th>
+            {% if status >= 2 %}
+            <th style="text-align: right;">Funding</th>
+            {% else %}
+            <th></th>
+            {% endif %}
+            <th style="display: table-cell;text-align: center;">
+                <img width="24" src="/static/msg.png">
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for p in _proposals %}
+            <tr>
+                <td><b><a href="/proposal/{{ p.id }}">{{ p.headline }}</a></b></td>
+                <td><a href="/user/{{ p.user.username }}">{{ p.user.username }}</a></td>
+                <td id="date"><small>{{ p.date_added.strftime('%Y-%m-%d %H:%M') }}</small></td>
+                <td>
+                    <span style="float:right;">
+                    {% if p.funds_progress >= 0.1 and status == 0 %}
+                        {{p.funds_progress|int}}%
+                    {% else %}
+                    -
+                    {% endif %}
+                    </span>
+                </td>
+                <td style="text-align:center;">
+                    {% if p.comment_count %}
+                        {{p.comment_count}}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endmacro %}

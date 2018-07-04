@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+{% from 'proposal/macros/table.html' import proposal_table %}
+
+<div class="container">
+    {% include 'proposal/macros/navbar.html' %}
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="row">
+                <div class="col-lg-12">
+                    {% if proposals['proposed'] %}
+                        {{ proposal_table(title='Proposals', _proposals=proposals['proposed']) }}
+                        <hr>
+                    {% else %}
+
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    {% if proposals['funding'] %}
+                        {{ proposal_table(title='Funding required', _proposals=proposals['funding']) }}
+                    {% else %}
+                        No proposals here yet.
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% include 'sidebar.html' %}
+    </div>
+
+
+</div>
+<!-- /.container -->
+{% endblock %}

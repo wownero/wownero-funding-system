@@ -32,6 +32,7 @@ body {
     font-weight: bold;
     color: #ff0000;
     font-size: 22px;
+    margin-bottom: 0;
 }
 
 .proposal_content blockquote {
@@ -219,7 +220,7 @@ a {
 
 .proposal_content{
     background-color: #00000008;
-    padding: .75rem 1.25rem;
+    padding: 1.25rem 1.25rem;
 }
 
 .form-control {
@@ -403,6 +404,10 @@ span.date_posted a{
     margin-top: 0.4rem !important;
 }
 
+.comment-container, .comment-container .comment-container{
+    margin-bottom: 0.4rem !important;
+}
+
 span.username a.author{
     color: #008926;
     font-weight: bold;
@@ -410,4 +415,8 @@ span.username a.author{
 
 :target {
     background: linear-gradient(90deg, #ff606008, #ffa93e2b);
+}
+
+.form-admin{
+    border: 1px solid #b60000;
 }

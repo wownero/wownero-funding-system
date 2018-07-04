@@ -1,0 +1,32 @@
+<div class="col-lg-8" style="padding-bottom: 0px;">
+    <div class="row">
+        <div class="form-group" style="text-align: center;">
+            <div>
+                <div data-toggle="buttons" class="btn-group btn-group-toggle">
+                    <label onclick="proposalNavbarclickDataHref(this);" data-href="{{ url_for('proposals', status=1) }}" class="btn btn-success {% if status == 1 %}active{% endif %}">
+                        Proposed <small>({{summary_data['statuses'][1]}})</small>
+                    </label>
+                    <label onclick="proposalNavbarclickDataHref(this);" data-href="{{ url_for('proposals', status=2) }}" class="btn btn-success {% if status == 2 %}active{% endif %}">
+                        Funding required <small>({{summary_data['statuses'][2]}})</small>
+                    </label>
+                    <label onclick="proposalNavbarclickDataHref(this);" data-href="{{ url_for('proposals', status=3) }}" class="btn btn-success {% if status == 3 %}active{% endif %}">
+                        Work in progress <small>({{summary_data['statuses'][3]}})</small>
+                    </label>
+                    <label onclick="proposalNavbarclickDataHref(this);" data-href="{{ url_for('proposals', status=4) }}" class="btn btn-success {% if status == 4 %}active{% endif %}">
+                        Completed <small>({{summary_data['statuses'][4]}})</small>
+                    </label>
+                </div>
+                <div id="point-wow-left">
+                    <img src="/static/point-left.png" style="margin-left: 10px;width: 60px;">
+                    <span style="color: #fc4dff;font-size: 16px;font-style: italic;font-weight: bold;margin-left: 6px;">wow</span>
+                </div>
+            </div>
+        </div>
+        {% if cat %}
+        <small class="form-text text-muted" style="margin-top: -2px;">
+            Results limited by category '{{cat}}'. <a href="{{ url_for('proposals', status=status) }}">Undo filter</a>.
+        </small>
+        <br>
+        {% endif %}
+    </div>
+</div>

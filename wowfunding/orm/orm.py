@@ -318,6 +318,8 @@ class Comment(base):
 
     locked = sa.Column(sa.Boolean, default=False)
 
+    automated = sa.Column(sa.Boolean, default=False)
+
     ix_comment_replied_to = sa.Index("ix_comment_replied_to", replied_to)
     ix_comment_proposal_id = sa.Index("ix_comment_proposal_id", proposal_id)
 
@@ -360,7 +362,7 @@ class Comment(base):
             raise
 
     @classmethod
-    def add_comment(cls, pid: int, user_id: int, message: str, cid: int = None, message_id: int = None):
+    def add_comment(cls, pid: int, user_id: int, message: str, cid: int = None, message_id: int = None, automated=False):
         from flask.ext.login import current_user
         from wowfunding.factory import db_session
         if not message:
@@ -373,7 +375,7 @@ class Comment(base):
             proposal = Proposal.find_by_id(pid=pid)
             if not proposal:
                 raise Exception("no proposal by that id")
-            comment = Comment(user_id=user_id, proposal_id=proposal.id)
+            comment = Comment(user_id=user_id, proposal_id=proposal.id, automated=automated)
             if cid:
                 parent = Comment.find_by_id(cid=cid)
                 if not parent:

@@ -40,10 +40,19 @@
                 </ol>
 
                 <form id="news_post" role="form" lpformnum="2" _lpchecked="1" onsubmit="return false;">
-                    {% if pid %}
-                        <input style="display:none" name="pid" value="{{pid}}">
+                    {% if current_user.admin %}
+                    <hr>
+                    <h4>Admin options:</h4>
+                    <div class="form-group">
+                        <label for="status">Move proposal to:</label>
+                        <select class="form-control form-admin" id="status" name="status">
+                            {% for k, v in funding_statuses.items() %}
+                                <option value="{{k}}"{% if proposal and k == proposal.status %} selected{% elif not proposal and k == 1 %} selected{% endif %}>{{v.capitalize()}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     {% endif %}
-
+                    <hr>
                     <!-- text input -->
                     <div class="form-group">
                         <label>Title</label>
@@ -69,7 +78,7 @@
                         <label for="category">Category</label>
                         <select class="form-control" id="category" name="category">
                             {% for cat in funding_categories %}
-                                <option value="{{cat}}"{% if proposal and cat == proposal.category %} selected{% endif %}>{{cat}}</option>
+                                <option value="{{cat}}"{% if proposal and cat == proposal.category %} selected{% elif not proposal and cat == 'misc' %} selected{% endif %}>{{cat}}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -133,6 +142,14 @@
 
             if (pid) {
                 data.pid = pid;
+            }
+
+            if (document.getElementById('status')){
+                var status = document.getElementById('status').value
+                status = parseInt(status);
+                data.status = status;
+            } else {
+                data.status = 1;
             }
 
             var xhr = new XMLHttpRequest();

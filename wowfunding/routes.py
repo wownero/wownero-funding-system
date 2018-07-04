@@ -22,7 +22,7 @@ def about():
 def proposal_add():
     if current_user.is_anonymous:
         return make_response(redirect(url_for('login')))
-    return make_response(render_template(('proposal_edit.html')))
+    return make_response(render_template(('proposal/edit.html')))
 
 
 @app.route('/proposal/comment', methods=['POST'])
@@ -69,7 +69,7 @@ def proposal(pid):
     p.get_comments()
     if not p:
         return make_response(redirect(url_for('proposals')))
-    return make_response(render_template(('proposal.html'), proposal=p))
+    return make_response(render_template(('proposal/proposal.html'), proposal=p))
 
 
 @app.route('/api/proposal/add', methods=['POST'])
@@ -79,9 +79,10 @@ def proposal(pid):
     parameter('pid', type=int, required=False, location='json'),
     parameter('funds_target', type=float, required=True, location='json'),
     parameter('addr_receiving', type=str, required=True, location='json'),
-    parameter('category', type=str, required=True, location='json')
+    parameter('category', type=str, required=True, location='json'),
+    parameter('status', type=int, required=True, location='json', default=1)
 )
-def proposal_api_add(title, content, pid, funds_target, addr_receiving, category):
+def proposal_api_add(title, content, pid, funds_target, addr_receiving, category, status):
     import markdown2
 
     if current_user.is_anonymous:
@@ -94,6 +95,12 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
 
     if category and category not in settings.FUNDING_CATEGORIES:
         return make_response(jsonify('unknown category'), 500)
+
+    if status not in settings.FUNDING_STATUSES.keys():
+        make_response(jsonify('unknown status'), 500)
+
+    if status != 1 and not current_user.admin:
+        return make_response(jsonify('no rights to change status'), 500)
 
     try:
         from wowfunding.bin.anti_xss import such_xss
@@ -117,6 +124,16 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
             p.addr_receiving = addr_receiving
         if category:
             p.category = category
+
+        # detect if an admin moved a proposal to a new status and auto-comment
+        if p.status != status and current_user.admin:
+            msg = "Moved to status \"%s\"." % settings.FUNDING_STATUSES[status].capitalize()
+            try:
+                Comment.add_comment(user_id=current_user.id, message=msg, pid=pid, automated=True)
+            except:
+                pass
+
+        p.status = status
         p.last_edited = datetime.now()
     else:
         if funds_target <= 1:
@@ -130,7 +147,7 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
         p.funds_target = funds_target
         p.addr_receiving = addr_receiving
         p.category = category
-        p.status = 1
+        p.status = status
         db_session.add(p)
 
     db_session.commit()
@@ -149,7 +166,7 @@ def proposal_edit(pid):
     if not p:
         return make_response(redirect(url_for('proposals')))
 
-    return make_response(render_template(('proposal_edit.html'), proposal=p))
+    return make_response(render_template(('proposal/edit.html'), proposal=p))
 
 
 @app.route('/search')
