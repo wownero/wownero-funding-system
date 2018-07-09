@@ -3,18 +3,20 @@ from flask import session, g
 
 import settings
 from wowfunding.factory import app, db_session, summary_data
-from wowfunding.orm.orm import Proposal, User
+from wowfunding.orm.orm import Proposal, User, Comment
 
 
 @app.context_processor
 def templating():
     global summary_data
     from flask.ext.login import current_user
+    recent_comments = db_session.query(Comment).order_by(Comment.date_added.desc()).limit(3).all()
     return dict(logged_in=current_user.is_authenticated,
                 current_user=current_user,
                 funding_categories=settings.FUNDING_CATEGORIES,
                 funding_statuses=settings.FUNDING_STATUSES,
-                summary_data=summary_data[1])
+                summary_data=summary_data[1],
+                recent_comments=recent_comments)
 
 
 def fetch_summary(purge=False):

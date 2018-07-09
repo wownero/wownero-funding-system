@@ -54,9 +54,19 @@
 
     <!-- Side Widget -->
     <div class="card my-4">
-        <h5 class="card-header">Cool widget</h5>
+        <h5 class="card-header">Recent comments</h5>
         <div class="card-body">
-            Many widgets. Such sidebar. Wow.
+            <ul class="b">
+                {% for c in recent_comments %}
+                <li>
+                    <a href="">{{c.user.username}}</a> in
+                    <a href="/proposal/{{c.proposal.id}}">#{{c.proposal.id}}</a>
+                    <small>
+                        <a href="/proposal/{{c.proposal.id}}#comment-{{c.id}}">({{c.ago}})</a>
+                    </small>
+                </li>
+                {% endfor %}
+            </li>
         </div>
     </div>
 

@@ -323,6 +323,11 @@ class Comment(base):
     ix_comment_replied_to = sa.Index("ix_comment_replied_to", replied_to)
     ix_comment_proposal_id = sa.Index("ix_comment_proposal_id", proposal_id)
 
+    @property
+    def ago(self):
+        from wowfunding.bin.utils_time import TimeMagic
+        return TimeMagic().ago(self.date_added)
+
     @staticmethod
     def find_by_id(cid: int):
         from wowfunding.factory import db_session
