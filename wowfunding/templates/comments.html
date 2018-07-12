@@ -37,7 +37,7 @@
                                 {{c.date_added.strftime('%Y-%m-%d %H:%M')}}
                             </a>
                         </span><br>
-                        <span style="{% if c.automated %}color:blue;{% endif %}">{{c.message}}</span>
+                        <span style="{% if c.automated %}color:blue;{% endif %};word-break: break-all;">{{c.message}}</span>
                         <br>
                         {% if not c.automated %}
                         <a class="reply" href="{{url_for('propsal_comment_reply', cid=c.id, pid=proposal.id)}}">reply</a>
@@ -46,7 +46,7 @@
                         {% for _c in c.comments %}
                         <div class="media mt-4 comment-container" id="comment-{{_c.id}}">
                             <div class="votearrow" title="upvote"></div>
-                            <div class="media-body">
+                            <div class="media-body" id="comment">
                                 <span class="username">
                                     <a href="/user/{{ _c.user.username }}">
                                         {{_c.user.username}}
@@ -63,8 +63,11 @@
                                     <a href="/proposal/{{proposal.id}}#comment-{{_c.id}}">
                                         {{_c.date_added.strftime('%Y-%m-%d %H:%M')}}
                                     </a>
-                                </span><br>
+                                </span>
+                                <br>
+                                <span style="word-break: break-all;">
                                 {{_c.message}}
+                                </span>
                             </div>
                         </div>
                         {% endfor %}

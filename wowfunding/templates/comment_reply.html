@@ -16,7 +16,9 @@
                     <div class="media-body">
                         <span class="username"><a href="/user/{{ c.user.username }}">{{c.user.username}}</a></span>
                         <span class="date_posted">{{c.date_added.strftime('%Y-%m-%d %H:%M')}}</span><br>
+                        <span style="word-break: break-all">
                         {{c.message}}
+                        </span>
                         <br><br>
                         {% if logged_in %}
                             <form method="post" action="{{url_for('proposal_comment')}}">

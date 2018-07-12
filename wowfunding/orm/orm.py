@@ -415,7 +415,7 @@ class Comment(base):
             db_session.add(comment)
             db_session.commit()
             db_session.flush()
-        except:
+        except Exception as ex:
             db_session.rollback()
-            raise Exception("could not add comment")
+            raise Exception(str(ex))
         return comment
