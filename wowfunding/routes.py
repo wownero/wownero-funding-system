@@ -235,7 +235,7 @@ def register():
         flash('Successfully registered. No confirmation email required. You can login!')
         return redirect(url_for('login'))
     except Exception as ex:
-        flash('Could not register user: %s' % str(ex), 'error')
+        flash('Could not register user. Probably a duplicate username or email that already exists.', 'error')
         return make_response(render_template('register.html'))
 
 
