@@ -32,7 +32,7 @@ class WowneroDaemon:
     def get_transfers_in(self, index):
         data = {
             "method":"get_transfers",
-            "params": {"in": True, "account_index": 0, "subaddr_indices": [index]},
+            "params": {"pool": True, "in": True, "account_index": 0, "subaddr_indices": [index]},
             "jsonrpc": "2.0",
             "id": "0",
         }
