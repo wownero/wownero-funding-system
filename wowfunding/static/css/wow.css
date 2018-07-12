@@ -208,7 +208,9 @@ a {
 }
 
 .card-header {
-    padding: .75rem 1.25rem;
+    padding: 0.5rem;
+    padding-left: 1.0rem;
+    font-size: 16px;
     margin-bottom: 0;
     background-color: rgba(0,0,0,.03);
     background: linear-gradient(90deg, #d253c829, #ffa93e69);
@@ -428,4 +430,40 @@ ul.b {
 
 .media-body #comment{
     word-break: break-all;
+}
+
+.api_documentation code{
+    background-color: #f3f3f3;
+    padding: 4px;
+    padding-top:2px;
+    padding-bottom:2px;
+}
+
+.api_documentation pre{
+    margin-top:0;
+    background-color: #f3f3f3;
+    padding: 4px;
+    font-size: 12px;
+    padding-left:8px;
+
+    white-space: pre-wrap;       /* Since CSS 2.1 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+}
+
+.api_documentation .api_container hr{
+    margin-bottom: 14px;
+    margin-top: 12px;
+}
+
+.api_documentation .api_container{
+    margin-bottom: 60px;
+}
+
+.sidebar .card-body{
+    padding: 1.0rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
 }

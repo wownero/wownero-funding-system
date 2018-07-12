@@ -122,13 +122,14 @@ class Proposal(base):
             'date_posted_epoch': self.date_added.strftime('%s'),
             'date_posted': self.date_added.strftime('%b %d %Y %H:%M:%S'),
             'headline': self.headline,
-            'content': self.content,
+            'content_markdown': self.content,
             'category': self.category,
             'funds_target': self.funds_target,
             'funded_pct': self.funds_progress,
             'addr_donation': self.addr_donation,
             'status': self.status,
-            'user': self.user.username
+            'user': self.user.username,
+            'id': self.id
         }
 
     @classmethod

@@ -18,6 +18,11 @@ def about():
     return make_response(render_template('about.html'))
 
 
+@app.route('/api')
+def api():
+    return make_response(render_template('api.html'))
+
+
 @app.route('/proposal/add/disclaimer')
 def proposal_add_disclaimer():
     return make_response(render_template(('proposal/disclaimer.html')))

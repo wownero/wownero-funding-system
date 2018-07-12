@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container api_documentation">
+    <div class="row" style="margin-bottom:4px;">
+        <div class="col-lg-8">
+            <h3>API documentation</h3>
+            <p>
+                Requests are made using standard HTTP and responses are returned in JSON format.
+            </p>
+            <p>
+                <ul>
+                    <li><a href="#api_convert_wow_usd">/api/1/convert/wow-usd</a></li>
+                    <li><a href="#api_proposals">/api/1/proposals</a></li>
+                </ul>
+            </p>
+            <br>
+
+            <div class="api_container" id="api_convert_wow_usd">
+                <h5><small>GET</small> <code>/api/1/convert/wow-usd</code></h5>
+                <hr>
+                <p>
+                    WOW to USD conversion. Data from TradeOgre and CoinMarketCap.
+                </p>
+
+                <b>Example:</b>
+                <pre>curl -vvX GET 'https://funding.wownero.com/api/1/convert/wow-usd?wow=1000'</pre>
+
+                <b>Response:</b>
+                <pre>{"usd": 6.7}</pre>
+            </div>
+
+            <div class="api_container" id="api_proposals">
+                <h5><small>GET</small> <code>/api/1/proposals</code></h5>
+                <hr>
+                <p>
+                    Proposal listing.
+                </p>
+
+                <b>Parameters:</b>
+                <ul>
+                    <li><code>status</code>: the proposal status, from 0 to 5. Default is 1.</li>
+                    <li><code>limit</code>: limit results. Default is 20.</li>
+                    <li><code>offset</code>: offset results. Default is 0.</li>
+                </ul>
+
+                <b>Example:</b>
+                <pre>curl -vvX GET 'https://funding.wownero.com/api/1/proposals?offset=1&limit=1&status=0'</pre>
+
+                <b>Response:</b>
+                <pre>{
+    "data": [
+        {
+            "id": 15,
+            "user": "dsc",
+            "headline": "[Bounty] Memes",
+            "content": "### markdown Content",
+            "category": "marketing",
+            "addr_donation": "WW3LcKRi3vJGSn11256Q819gExLtfsR3DZeGneu7K55QeeS4YcKMaDAHZ16hRM2gmJT7pVRiTGesjCsJUNAJPTn42rnh7wZEa",
+            "date_posted": "Jul 09 2018 21:59:26",
+            "date_posted_epoch": "1531173566",
+            "funded_pct": 33.3333333333333,
+            "funds_target": 15000.0,
+            "status": 2
+        }
+    ]
+}</pre>
+            </div>
+        </div>
+
+        {% include 'sidebar.html' %}
+    </div>
+
+
+</div>
+<!-- /.container -->
+{% endblock %}
