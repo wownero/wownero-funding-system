@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
 <!-- Page Content -->
-
 <div class="container" style="margin-bottom:140px;">
     {% include 'messages.html' %}
 
@@ -35,6 +34,9 @@
                 <br>
                 <span>
                     Target: <b>{{proposal.funds_target|round}}</b> WOW
+                     {% if proposal.funds_target_usd %}
+                    <small>➞ {{proposal.funds_target_usd}} USD</small>
+                    {% endif %}
                 </span>
                 {% endif %}
             </p>
@@ -60,7 +62,13 @@
                                         <tbody>
                                             <tr>
                                                 <td>Target</td>
-                                                <td><span class="badge">{{proposal.funds_target|round}} WOW</span></td>
+                                                <td>
+                                                    <span class="badge">{{proposal.funds_target|round}} WOW
+                                                     {% if proposal.funds_target_usd %}
+                                                    <small>➞ {{proposal.funds_target_usd}} USD</small>
+                                                    {% endif %}
+                                                    </span>
+                                                </td>
                                             </tr>
                                             <tr>
                                                 <td>Progress</td>
@@ -143,7 +151,14 @@
                             <span style="float:right"><b>Blockheight</b>: {{tx['height']}}</span>
                             <br>
                             <a target="_blank" href="https://explore.wownero.com/tx/{{tx['txid']}}">{{tx['txid'][:32]}}...</a>
-                            <span style="float:right;color:#008926;font-weight:bold;">+ {{tx['amount_human']|round(2)}} WOW</span>
+                            <span style="float:right;color:#008926;font-weight:bold;">
+                                + {{tx['amount_human']|round(2)}} WOW
+                                {% if 'amount_usd' in tx %}
+                                <small style="color: black">
+                                    ➞ $ {{tx['amount_usd']}}
+                                </small>
+                                {% endif %}
+                            </span>
                         </li>
                         {% endfor %}
                     </ul>

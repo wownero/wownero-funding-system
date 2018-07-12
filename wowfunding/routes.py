@@ -160,8 +160,8 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
     db_session.flush()
 
     # reset cached statistics
-    from wowfunding.bin import utils_request
-    utils_request.fetch_summary(purge=True)
+    from wowfunding.bin.utils import Summary
+    Summary.fetch_stats(purge=True)
 
     return make_response(jsonify({'url': url_for('proposal', pid=p.id)}))
 

@@ -13,7 +13,8 @@ def redis_args():
         "port": settings.REDIS_PORT,
         'socket_connect_timeout': 2,
         'socket_timeout': 2,
-        'retry_on_timeout': True
+        'retry_on_timeout': True,
+        'decode_responses': True
     }
     if settings.REDIS_PASSWD:
         args["password"] = settings.REDIS_PASSWD
@@ -41,7 +42,7 @@ class JsonRedis(RedisSessionInterface):
 
     def __init__(self, key_prefix, use_signer=False, decode_responses=True):
         super(JsonRedis, self).__init__(
-            redis=redis.Redis(decode_responses=decode_responses, **redis_args()),
+            redis=redis.Redis(**redis_args()),
             key_prefix=key_prefix,
             use_signer=use_signer)
 

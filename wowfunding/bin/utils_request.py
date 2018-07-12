@@ -2,59 +2,33 @@ from datetime import datetime
 from flask import session, g
 
 import settings
-from wowfunding.factory import app, db_session, summary_data
+from wowfunding.bin.utils import Summary
+from wowfunding.factory import app, db_session
 from wowfunding.orm.orm import Proposal, User, Comment
 
 
 @app.context_processor
 def templating():
-    global summary_data
     from flask.ext.login import current_user
     recent_comments = db_session.query(Comment).order_by(Comment.date_added.desc()).limit(3).all()
+    summary_data = Summary.fetch_stats()
     return dict(logged_in=current_user.is_authenticated,
                 current_user=current_user,
                 funding_categories=settings.FUNDING_CATEGORIES,
                 funding_statuses=settings.FUNDING_STATUSES,
-                summary_data=summary_data[1],
+                summary_data=summary_data,
                 recent_comments=recent_comments)
-
-
-def fetch_summary(purge=False):
-    global summary_data
-    if summary_data and not purge:
-        if (datetime.now() - summary_data[0]).total_seconds() <= 120:
-            return
-
-    data = {}
-    categories = settings.FUNDING_CATEGORIES
-    statuses = settings.FUNDING_STATUSES.keys()
-
-    for cat in categories:
-        q = db_session.query(Proposal)
-        q = q.filter(Proposal.category == cat)
-        res = q.count()
-        data.setdefault('cats', {})
-        data['cats'][cat] = res
-
-    for status in statuses:
-        q = db_session.query(Proposal)
-        q = q.filter(Proposal.status == status)
-        res = q.count()
-        data.setdefault('statuses', {})
-        data['statuses'][status] = res
-
-    data.setdefault('users', {})
-    data['users']['count'] = db_session.query(User.id).count()
-    summary_data = [datetime.now(), data]
 
 
 @app.before_request
 def before_request():
-    fetch_summary()
+    pass
 
 
 @app.after_request
 def after_request(res):
+    if hasattr(g, 'wowfunding_prices'):
+        delattr(g, 'wowfunding_prices')
     res.headers.add('Accept-Ranges', 'bytes')
     if settings.DEBUG:
         res.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'

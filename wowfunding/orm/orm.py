@@ -147,6 +147,14 @@ class Proposal(base):
         return result
 
     @property
+    def funds_target_usd(self):
+        from wowfunding.bin.utils import Summary, wow_to_usd
+        prices = Summary.fetch_prices()
+        if not prices:
+            return
+        return wow_to_usd(wows=self.funds_target, btc_per_wow=prices['wow-btc'], usd_per_btc=prices['btc-usd'])
+
+    @property
     def comment_count(self):
         from wowfunding.factory import db_session
         q = db_session.query(sa.func.count(Comment.id))
@@ -176,6 +184,7 @@ class Proposal(base):
         of this proposal. It uses Redis cache to not spam the
         wownerod too much. Returns a nice dictionary containing
         all relevant proposal funding info"""
+        from wowfunding.bin.utils import Summary, wow_to_usd
         from wowfunding.factory import cache, db_session
         rtn = {'sum': 0.0, 'txs': [], 'pct': 0.0}
 
@@ -193,7 +202,10 @@ class Proposal(base):
                 print('error; get_transfers; %d' % self.id)
                 return rtn
 
+        prices = Summary.fetch_prices()
         for tx in data['txs']:
+            if prices:
+                tx['amount_usd'] = wow_to_usd(wows=tx['amount_human'], btc_per_wow=prices['wow-btc'], usd_per_btc=prices['btc-usd'])
             tx['datetime'] = datetime.fromtimestamp(tx['timestamp'])
 
         if data.get('sum', 0.0):

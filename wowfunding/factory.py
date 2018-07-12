@@ -8,7 +8,6 @@ sentry = None
 cache = None
 db_session = None
 bcrypt = None
-summary_data = []
 
 
 def create_app():
@@ -52,9 +51,6 @@ def create_app():
     from wowfunding import routes
     from wowfunding import api
     from wowfunding.bin import utils_request
-
-    # generate some statistics
-    utils_request.fetch_summary()
 
     app.app_context().push()
     return app
