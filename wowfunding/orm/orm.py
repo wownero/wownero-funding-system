@@ -167,6 +167,7 @@ class Proposal(base):
         q = db_session.query(Comment)
         q = q.filter(Comment.proposal_id == self.id)
         q = q.filter(Comment.replied_to == None)
+        q = q.order_by(Comment.date_added.desc())
         comments = q.all()
 
         for c in comments:
