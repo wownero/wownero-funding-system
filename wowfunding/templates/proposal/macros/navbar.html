@@ -10,7 +10,7 @@
                         Funding required <small>({{summary_data['statuses'][2]}})</small>
                     </label>
                     <label onclick="proposalNavbarclickDataHref(this);" data-href="{{ url_for('proposals', status=3) }}" class="btn btn-success {% if status == 3 %}active{% endif %}">
-                        Work in progress <small>({{summary_data['statuses'][3]}})</small>
+                        WIP / Help needed <small>({{summary_data['statuses'][3]}})</small>
                     </label>
                     <label onclick="proposalNavbarclickDataHref(this);" data-href="{{ url_for('proposals', status=4) }}" class="btn btn-success {% if status == 4 %}active{% endif %}">
                         Completed <small>({{summary_data['statuses'][4]}})</small>
