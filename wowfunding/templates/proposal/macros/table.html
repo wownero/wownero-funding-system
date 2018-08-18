@@ -1,8 +1,8 @@
-{% macro proposal_table(title, _proposals) %}
-    <table class="table table-proposal table-hover" style="margin-bottom:6px;">
+{% macro proposal_table(title, status, _proposals) %}
+    <table class="table table-proposal table-hover" data-status="{{ status }}" style="margin-bottom:6px;">
         <thead>
         <tr>
-            <th style="font-size: x-large;">{{title}}</th>
+            <th style="font-size: 20px;">{{title}}</th>
             <th>Username</th>
             <th id="date">Date</th>
             {% if _proposals and _proposals[0].status >= 2 %}
@@ -18,10 +18,10 @@
         <tbody>
             {% for p in _proposals %}
             <tr>
-                <td><b><a href="/proposal/{{ p.id }}">{{ p.headline }}</a></b></td>
-                <td><a href="/user/{{ p.user.username }}">{{ p.user.username }}</a></td>
-                <td id="date"><small>{{ p.date_added.strftime('%Y-%m-%d %H:%M') }}</small></td>
-                <td>
+                <td class="id"><b><a href="/proposal/{{ p.id }}">{{ p.headline }}</a></b></td>
+                <td class="user"><a href="/user/{{ p.user.username }}">{{ p.user.username }}</a></td>
+                <td class="date"><small>{{ p.date_added.strftime('%Y-%m-%d %H:%M') }}</small></td>
+                <td class="funds">
                     <span style="float:right;">
                     {% if p.funds_progress >= 0.1 and p.status >= 2 %}
                         {{p.funds_progress|int}}%

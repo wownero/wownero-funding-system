@@ -2,7 +2,7 @@
 {% block content %}
 {% from 'proposal/macros/table.html' import proposal_table %}
 
-<div class="container" style="margin-top:8px;">
+<div class="container proposal-overview" style="margin-top:25px;">
     {% include 'proposal/macros/navbar.html' %}
 
     <div class="row">
@@ -10,23 +10,32 @@
             <div class="row">
                 <div class="col-lg-12">
                     {% if proposals['proposed'] %}
-                        {{ proposal_table(title='Proposals', _proposals=proposals['proposed']) }}
-                        <hr>
+                        {{ proposal_table(title='Proposals', status=1, _proposals=proposals['proposed']) }}
+                        <br>
                     {% endif %}
                 </div>
             </div>
             <div class="row">
                 <div class="col-lg-12">
                     {% if proposals['funding'] %}
-                        {{ proposal_table(title='Funding required', _proposals=proposals['funding']) }}
-                        <hr>
+                        {{ proposal_table(title='Funding required', status=2, _proposals=proposals['funding']) }}
+                        <br>
                     {% endif %}
                 </div>
             </div>
             <div class="row">
                 <div class="col-lg-12">
                     {% if proposals['wip'] %}
-                        {{ proposal_table(title='WIP / Help needed', _proposals=proposals['wip']) }}
+                        {{ proposal_table(title='WIP / Help needed', status=3, _proposals=proposals['wip']) }}
+                        <br>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    {% if proposals['completed'] %}
+                        {{ proposal_table(title='Completed', status=4, _proposals=proposals['completed']) }}
+                        <br>
                     {% endif %}
                 </div>
             </div>

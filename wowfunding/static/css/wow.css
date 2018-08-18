@@ -136,7 +136,7 @@ body {
 
 .table th, .table td {
     border-top: 1px solid #008926;
-    padding-top: .4rem;
+    padding-top: .3rem;
 }
 
 .table-tilted{
@@ -167,6 +167,15 @@ body {
 .table thead th {
     border-bottom: 1px solid #008926 !important;
     border-top: none;
+    font-size: 14px;
+}
+
+.table tbody td.date {
+    max-width: 100px;
+}
+
+.table tbody td.user {
+    font-size: 14px;
 }
 
 .table tbody td{
@@ -321,7 +330,7 @@ nav .nav-link .active{
 }
 
 #point-wow-left{
-    float: right;
+    display: inline;
 }
 
 @media only screen and (max-width: 600px) {
@@ -550,4 +559,20 @@ ul.b {
   font-weight: 400;
   src: local('Roboto'), local('Roboto-Regular'), url(/static/fonts/roboto-7.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+.proposal-overview .table-proposal[data-status="4"] {
+    opacity: 0.4;
+}
+
+.proposal-overview .table-proposal[data-status="4"] thead th {
+    border-bottom: 1px solid #4b4b4b !important;
+}
+
+.proposal-overview .table-proposal[data-status="4"] td {
+    border-top: 1px solid #4b4b4b;
+}
+
+.proposal-overview .table-proposal[data-status="4"], .proposal-overview .table-proposal[data-status="4"] a {
+    color: #4b4b4b;
 }
