@@ -585,6 +585,7 @@ ul.b {
     max-width:500px;
     max-height:600px;
     display: inline;
+    width: 100%;
 }
 
 .wow_addy{

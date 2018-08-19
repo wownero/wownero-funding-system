@@ -180,11 +180,14 @@
 
 <script>
     $(document).ready(function(){
-        let regexp_url = /^[a-zA-Z0-9.:\/]+$/;
+        let regexp_xss = /^[a-zA-Z0-9.:\/]+$/;
         let regexp_address = /(W[o|W][a-zA-Z0-9]{95})/g;
+        let regexp_imgur = /(https:\/\/i.imgur.com\/[a-zA-Z]{0,7}.[jpg|png|gif|webm]+)/g;
+        let regexp_imgflip = /(https:\/\/i.imgflip.com\/[a-zA-Z0-9]{0,7}.[jpg|png|gif|webm]+)/g;
         let truncated_addy = function(obj){ return `<span data-addy="${obj}" class="wow_addy">${obj.substring(0, 4)}...${obj.slice(-4)}</span>`; }
 
         function rich_addy(obj) {
+            // richtext addy's
             let html = obj.html();
             var matches = html.match(regexp_address);
             if(matches) {
@@ -196,30 +199,19 @@
         }
 
         function rich_img(obj) {
-            let content = obj.html();
-            //let x = obj.attr('data-id');
-            //if(x == 52){
-            //    debugger;
-            //}
-
-            let spl = content.split(' ');
-            let lines = [];
-            spl.forEach(function (line) {
-                line = line.trim();
-                if (line && line.search(regexp_url) != -1 && line.indexOf("..") < 0) {
-                    if (line.startsWith('https://i.imgflip.com/')) {
-                        line = `<br><img src="${line}"/></a><br>`;
-                    } else if (line.startsWith('https://i.imgur.com/')) {
-                        line = `<br><img src="${line}"/></a><br>`;
-                    }
-                }
-
-                if (line) {
-                    lines.push(line);
-                }
-            });
-
-            obj.html(lines.join(" "));
+            // convert images to <img>
+            let html = obj.html();
+            //let uid = obj.attr('data-id');
+            var matches = html.match(regexp_imgur) || [];
+            matches = matches.concat(html.match(regexp_imgflip));
+            if(matches) {
+                matches.filter(function (value, index, self) {
+                    return self.indexOf(value) === index && typeof value === 'string';
+                }).forEach(function (obj) {
+                    html = html.replace(new RegExp(obj, 'g'), `<br><img src="${obj}"/></a><br>`)
+                });
+            }
+            obj.html(html);
         }
 
         $(document).on('click', '.wow_addy', function(event){
