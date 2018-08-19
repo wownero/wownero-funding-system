@@ -182,7 +182,7 @@
     $(document).ready(function(){
         let regexp_xss = /^[a-zA-Z0-9.:\/]+$/;
         let regexp_address = /(W[o|W][a-zA-Z0-9]{95})/g;
-        let regexp_imgur = /(https:\/\/i.imgur.com\/[a-zA-Z]{0,7}.[jpg|png|gif|webm]+)/g;
+        let regexp_imgur = /(https:\/\/i.imgur.com\/[a-zA-Z0-9]{0,7}.[jpg|png|gif|webm]+)/g;
         let regexp_imgflip = /(https:\/\/i.imgflip.com\/[a-zA-Z0-9]{0,7}.[jpg|png|gif|webm]+)/g;
         let truncated_addy = function(obj){ return `<span data-addy="${obj}" class="wow_addy">${obj.substring(0, 4)}...${obj.slice(-4)}</span>`; }
 
@@ -201,7 +201,11 @@
         function rich_img(obj) {
             // convert images to <img>
             let html = obj.html();
-            //let uid = obj.attr('data-id');
+            let uid = obj.attr('data-id');
+            if(uid == 30){
+                debugger;
+            }
+
             var matches = html.match(regexp_imgur) || [];
             matches = matches.concat(html.match(regexp_imgflip));
             if(matches) {
