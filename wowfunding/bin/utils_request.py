@@ -10,7 +10,7 @@ from wowfunding.orm.orm import Proposal, User, Comment
 @app.context_processor
 def templating():
     from flask.ext.login import current_user
-    recent_comments = db_session.query(Comment).filter(Comment.automated == False).order_by(Comment.date_added.desc()).limit(3).all()
+    recent_comments = db_session.query(Comment).filter(Comment.automated == False).order_by(Comment.date_added.desc()).limit(10).all()
     summary_data = Summary.fetch_stats()
     return dict(logged_in=current_user.is_authenticated,
                 current_user=current_user,
