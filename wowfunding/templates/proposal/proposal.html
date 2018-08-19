@@ -208,9 +208,9 @@
                 line = line.trim();
                 if (line && line.search(regexp_url) != -1 && line.indexOf("..") < 0) {
                     if (line.startsWith('https://i.imgflip.com/')) {
-                        line = `<img src="${line}"/></a><br>`;
+                        line = `<br><img src="${line}"/></a><br>`;
                     } else if (line.startsWith('https://i.imgur.com/')) {
-                        line = `<img src="${line}"/></a><br>`;
+                        line = `<br><img src="${line}"/></a><br>`;
                     }
                 }
 

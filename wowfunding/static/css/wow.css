@@ -582,8 +582,6 @@ ul.b {
 }
 
 .comments-panel .comment-container .media-body span.body img{
-    margin-top:20px;
-    margin-bottom:10px;
     max-width:500px;
     max-height:600px;
     display: inline;
