@@ -58,13 +58,14 @@
         <div class="card-body">
             <ul class="b">
                 {% for c in recent_comments %}
+                <a href="/proposal/{{c.proposal.id}}#comment-{{c.id}}">
                 <li>
-                    <a href="">{{c.user.username}}</a> in
-                    <a href="/proposal/{{c.proposal.id}}">#{{c.proposal.id}}</a>
+                    {{c.user.username}} in #{{c.proposal.id}}
                     <small>
-                        <a href="/proposal/{{c.proposal.id}}#comment-{{c.id}}">({{c.ago}})</a>
+                        ({{c.ago}})
                     </small>
                 </li>
+                </a>
                 {% endfor %}
             </li>
         </div>
