@@ -178,5 +178,72 @@
 
 </div>
 
+<script>
+    $(document).ready(function(){
+        let regexp_url = /^[a-zA-Z0-9.:\/]+$/;
+        let regexp_address = /(W[o|W][a-zA-Z0-9]{95})/g;
+        let truncated_addy = function(obj){ return `<span data-addy="${obj}" class="wow_addy">${obj.substring(0, 4)}...${obj.slice(-4)}</span>`; }
+
+        function rich_addy(obj) {
+            let html = obj.html();
+            var matches = html.match(regexp_address);
+            if(matches) {
+                matches.filter(function(value, index,self){ return self.indexOf(value) === index; }).forEach(function (obj) {
+                    html = html.replace(new RegExp(obj, 'g'), truncated_addy(obj));
+                });
+            }
+            obj.html(html);
+        }
+
+        function rich_img(obj) {
+            let content = obj.html();
+            //let x = obj.attr('data-id');
+            //if(x == 52){
+            //    debugger;
+            //}
+
+            let spl = content.split(' ');
+            let lines = [];
+            spl.forEach(function (line) {
+                line = line.trim();
+                if (line && line.search(regexp_url) != -1 && line.indexOf("..") < 0) {
+                    if (line.startsWith('https://i.imgflip.com/')) {
+                        line = `<img src="${line}"/></a><br>`;
+                    } else if (line.startsWith('https://i.imgur.com/')) {
+                        line = `<img src="${line}"/></a><br>`;
+                    }
+                }
+
+                if (line) {
+                    lines.push(line);
+                }
+            });
+
+            obj.html(lines.join(" "));
+        }
+
+        $(document).on('click', '.wow_addy', function(event){
+            let obj = $(this);
+            if(obj.attr('data-active') === "true"){
+                //obj.attr('data-active', 'false');
+                //obj.html(truncated_addy(obj.attr('data-addy')));
+            } else {
+                obj.attr('data-active', 'true');
+                obj.html(obj.attr('data-addy'));
+            }
+        });
+
+        $('.comments-panel .comment-container .media-body span.body').each(function (i, obj){
+            obj = $(obj);
+
+            // convert images to <img>
+            rich_img(obj);
+
+            // truncate addys
+            let html = rich_addy(obj);
+        });
+    });
+</script>
+
 <!-- /.container -->
 {% endblock %}

@@ -576,3 +576,27 @@ ul.b {
 .proposal-overview .table-proposal[data-status="4"], .proposal-overview .table-proposal[data-status="4"] a {
     color: #4b4b4b;
 }
+
+.comments-panel {
+    background-color: #ffffffb0;
+}
+
+.comments-panel .comment-container .media-body span.body img{
+    margin-top:20px;
+    margin-bottom:10px;
+    max-width:500px;
+    max-height:600px;
+    display: inline;
+}
+
+.wow_addy{
+    color: red;
+    cursor: pointer;
+    font-family: monospace;
+    background: #f6f6f6;
+    font-size:14px;
+}
+
+.wow_addy[data-active="true"]{
+    cursor: default;
+}

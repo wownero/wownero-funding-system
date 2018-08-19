@@ -2,7 +2,7 @@
     <div class="col-md-12">
         <div class="card my-6" id="incoming_txs">
             <h5 id="comments" class="card-header">Comments</h5>
-            <div class="card-body">
+            <div class="card-body comments-panel">
                 {% if logged_in %}
                     <form method="post" action="comment">
                         <input type="hidden" name="pid" value="{{proposal.id}}">
@@ -37,7 +37,7 @@
                                 {{c.date_added.strftime('%Y-%m-%d %H:%M')}}
                             </a>
                         </span><br>
-                        <span style="{% if c.automated %}color:blue;{% endif %};word-break: break-all;">{{c.message}}</span>
+                        <span data-id="{{c.id}}" class="body" style="{% if c.automated %}color:blue;{% endif %};word-break: break-all;">{{c.message}}</span>
                         <br>
                         {% if not c.automated %}
                         <a class="reply" href="{{url_for('propsal_comment_reply', cid=c.id, pid=proposal.id)}}">reply</a>
@@ -65,7 +65,7 @@
                                     </a>
                                 </span>
                                 <br>
-                                <span style="word-break: break-all;">
+                                <span data-id="{{_c.id}}" class="body" style="word-break: break-all;">
                                 {{_c.message}}
                                 </span>
                             </div>
