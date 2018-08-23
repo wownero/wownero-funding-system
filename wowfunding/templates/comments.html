@@ -7,7 +7,15 @@
                     <form method="post" action="comment">
                         <input type="hidden" name="pid" value="{{proposal.id}}">
                         <textarea class="comment" name="text" rows="6" cols="60"></textarea>
-                        <br><br><input type="submit" value="add comment">
+                        <br><br>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="alert alert-secondary" role="alert">
+                                    Posting imgur/imgflip media can be done by linking directly to the image, no [img] bbcode needed.
+                                </div>
+                            </div>
+                        </div>
+                        <input type="submit" value="add comment">
                     </form>
                 {% else %}
                     You need to be logged in to comment.
