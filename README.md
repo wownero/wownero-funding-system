@@ -22,3 +22,5 @@ python run_dev.py
 
 https://imgur.com/KKzFQe9
 https://imgur.com/Dl3wRgD
+
+© 2018 WTFPL – Do What the Fuck You Want to Public License
