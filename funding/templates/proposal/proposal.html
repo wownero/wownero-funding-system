@@ -11,11 +11,6 @@
             <!-- Title -->
             <h1 class="mt-4" style="margin-bottom: 0.1rem;">
                 {{ proposal.headline }}
-
-                <div id="point-wow-left">
-                    <img src="/static/point-left.png" style="margin-left: 10px;width: 60px;">
-                    <span style="color: #fc4dff;font-size: 16px;font-style: italic;font-weight: bold;margin-left: 6px;">wow</span>
-                </div>
             </h1>
 
             <p>
@@ -78,8 +73,8 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td>Progress</td>
-                                                <td><span class="badge">{{proposal.balance['pct'] |round}} %</span></td>
+                                                <td>Funded</td>
+                                                <td><span class="badge">{{proposal.balance['pct'] | round or 0}} %</span></td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -100,17 +95,43 @@
                                     <hr>
                                 </div>
                                 <div class="col-lg-8">
-                                    {{proposal.balance['remaining'] or 0}} WOW available
-
+                                    {{proposal.balance['available']|round(3) or 0 }} WOW Raised 
+                                    {% if (proposal.funds_target-proposal.balance['available']|float|round(3)) > 0 %} 
+                                        ({{ (proposal.funds_target-proposal.balance['available']|float|round(3)|int) }} WOW until goal)
+                                        {% else %} 
+                                        ({{ (proposal.balance['available']-proposal.funds_target|float|round(3)|int) }} WOW past goal!)
+                                    {% endif %}
+                                    <div class="progress">
+                                        <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.balance['pct']}}%;">
+                                        </div> 
+                                    </div>
+                                    <hr>
+                                </div>
+                                <br/>
+                                
+                                <br/>
+                                <div class="col-lg-8">
+                                    {{proposal.spends['spent']|round(3) or 0}} WOW Paid out
+                                    <div class="progress">
+                                        <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.spends['spent_remaining_pct']}}%;">
+                                        </div>
+                                    </div>
+                                    <hr>
+                                </div>
+                                <div class="col-lg-8">
+                                    {{(proposal.balance['available']-proposal.spends['spent']) |round(3) or 0}} WOW Available to Payout
                                     <div class="progress">
                                         <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.balance['remaining_pct']}}%;">
                                         </div>
                                     </div>
+                                    <hr>
                                 </div>
+
+                                <br/>
                             </div>
                             <div class="row" style="margin-top:16px;">
                                 <div class="col-lg-12">
-                                    Donatation address:
+                                    Donation address:
                                     <pre class="proposal_address">{% if proposal.addr_donation %}{{ proposal.addr_donation }}{% else %}<small>None generated yet</small>{% endif %}</pre>
                                 </div>
                             </div>
@@ -122,7 +143,6 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="alert alert-danger">
-                            <img src="/static/doge_head.png" style="width: 64px;margin-right: 8px;">
                             This proposal is disabled.
                         </div>
                     </div>
@@ -159,7 +179,7 @@
                             <br>
                             <a target="_blank" href="https://explore.wownero.com/tx/{{tx['txid']}}">{{tx['txid'][:32]}}...</a>
                             <span style="float:right;color:#008926;font-weight:bold;">
-                                + {{tx['amount_human']|round(2)}} WOW
+                                + {{tx['amount_human']|round(3)}} WOW
                                 {% if 'amount_usd' in tx %}
                                 <small style="color: black">
                                     ➞ $ {{tx['amount_usd']}}
@@ -176,6 +196,37 @@
     <!-- /.row -->
     {% endif %}
 
+
+{% if proposal.spends['txs'] %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card my-6" id="incoming_txs">
+                <h5 class="card-header">Outgoing transactions <small>({{proposal.spends['txs']|length}})</small></h5>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for tx in proposal.spends['txs'] %}
+                        <li class="list-group-item">
+                            {{tx['datetime'].strftime('%Y-%m-%d %H:%M')}}
+                            <span style="float:right"><b>Blockheight</b>: {{tx['height']}}</span>
+                            <br>
+                            <a target="_blank" href="https://explore.wownero.com/tx/{{tx['txid']}}">{{tx['txid'][:32]}}...</a>
+                            <span style="float:right;color:#890000;font-weight:bold;">
+                                - {{tx['amount_human']|round(3)}} WOW
+                                {% if 'amount_usd' in tx %}
+                                <small style="color: black">
+                                    ➞ $ {{tx['amount_usd']}}
+                                </small>
+                                {% endif %}
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.row -->
+    {% endif %}
 </div>
 
 <script>

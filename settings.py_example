@@ -3,30 +3,40 @@ import socket
 import collections
 import os
 
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SECRET = 'changeme'
+SECRET = ''
 DEBUG = True
 
-SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI', 'postgresql://postgres:@localhost/ffs')
+COINCODE = ''
+PSQL_USER = ''
+PSQL_PASS = ''
+PSQL_DB = ''
 
-SESSION_COOKIE_NAME = os.environ.get('WOW_SESSION_COOKIE_NAME', 'wow_id')
-SESSION_PREFIX = os.environ.get('WOW_SESSION_PREFIX', 'session:')
+SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI', 'postgresql://{user}:{pw}@localhost/{db}').format(user=PSQL_USER, pw=PSQL_PASS, db=PSQL_DB)
 
-REDIS_HOST = os.environ.get('WOW_REDIS_HOST', '127.0.0.1')
-REDIS_PORT = int(os.environ.get('WOW_REDIS_PORT', 6379))
-REDIS_PASSWD = os.environ.get('WOW_REDIS_PASSWD', None)
+SESSION_COOKIE_NAME = os.environ.get('{coincode}_SESSION_COOKIE_NAME', '{coincode}_id').format(coincode=COINCODE)
+SESSION_PREFIX = os.environ.get('{coincode}_SESSION_PREFIX', 'session:').format(coincode=COINCODE)
 
-BIND_HOST = os.environ.get("WOW_BIND_HOST", "127.0.0.1")
+REDIS_HOST = os.environ.get('REDIS_HOST', '127.0.0.1')
+REDIS_PORT = int(os.environ.get('REDIS_PORT', 6379))
+REDIS_PASSWD = os.environ.get('REDIS_PASSWD', None)
+
+BIND_HOST = os.environ.get("BIND_HOST", "0.0.0.0")
 if not BIND_HOST:
-    raise Exception("WOW_BIND_HOST missing")
-BIND_PORT = os.environ.get("WOW_BIND_PORT", 5004)
+    raise Exception("BIND_HOST missing")
+BIND_PORT = os.environ.get("BIND_PORT", 5004)
 if not BIND_PORT:
-    raise Exception("WOW_BIND_PORT missing")
+    raise Exception("BIND_PORT missing")
 
-HOSTNAME = os.environ.get("WOW_HOSTNAME", socket.gethostname())
+HOSTNAME = os.environ.get("{coincode}_HOSTNAME", socket.gethostname()).format(coincode=COINCODE)
 
-RPC_LOCATION = "http://127.0.0.1:45678/json_rpc"
+# If using a local RPC, no need for --rpc-login credentials unless you're binding wallet-rpc to 0.0.0.0. If you are, you're bad.
+# elif, remote wallet-rpc, enable --rpc-login and enter credentials below.
+RPC_HOST = '127.0.0.1'
+RPC_PORT = '11182'
+RPC_LOCATION = "http://{host}:{rpc_port}/json_rpc".format(host=RPC_HOST, rpc_port=RPC_PORT)
+RPC_USERNAME = ""
+RPC_PASSWORD = ""
 
 FUNDING_CATEGORIES = [
     'wallets',
@@ -52,7 +62,7 @@ What problem(s) are you trying to solve?
 
 #### How much?
 
-What is the total cost in WOW? List expenses per item. Total hours of work and per hour rate. What exchange rates are you using?
+What is the total cost in {coincode}? List expenses per item. Total hours of work and per hour rate. What exchange rates are you using?
 
 #### What?
 
@@ -69,4 +79,4 @@ What will be delivered? What goals will be reached?
 #### Why you?
 
 What skills and experience do you have?
-""".strip()
+""".strip().format(coincode=COINCODE)

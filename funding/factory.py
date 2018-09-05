@@ -17,7 +17,7 @@ def create_app():
     global cache
     global bcrypt
 
-    from wowfunding.orm.connect import create_session
+    from funding.orm.connect import create_session
     db_session = create_session()
 
     app = Flask(__name__)
@@ -39,18 +39,18 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(_id):
-        from wowfunding.orm.orm import User
+        from funding.orm.orm import User
         return User.query.get(int(_id))
 
     # session init
-    from wowfunding.cache import JsonRedis, WowCache
+    from funding.cache import JsonRedis, WowCache
     app.session_interface = JsonRedis(key_prefix=app.config['SESSION_PREFIX'], use_signer=False)
     cache = WowCache()
 
     # import routes
-    from wowfunding import routes
-    from wowfunding import api
-    from wowfunding.bin import utils_request
+    from funding import routes
+    from funding import api
+    from funding.bin import utils_request
 
     app.app_context().push()
     return app

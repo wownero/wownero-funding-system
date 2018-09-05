@@ -4,8 +4,8 @@ from flask.ext.login import login_user , logout_user , current_user, login_requi
 from flask_yoloapi import endpoint, parameter
 
 import settings
-from wowfunding.factory import app, db_session
-from wowfunding.orm.orm import Proposal, User, Comment
+from funding.factory import app, db_session
+from funding.orm.orm import Proposal, User, Comment
 
 
 @app.route('/')
@@ -61,7 +61,7 @@ def proposal_comment(pid, text, cid):
 
 @app.route('/proposal/<int:pid>/comment/<int:cid>')
 def propsal_comment_reply(cid, pid):
-    from wowfunding.orm.orm import Comment
+    from funding.orm.orm import Comment
     c = Comment.find_by_id(cid)
     if not c or c.replied_to:
         return redirect(url_for('proposal', pid=pid))
@@ -88,7 +88,7 @@ def proposal(pid):
     parameter('title', type=str, required=True, location='json'),
     parameter('content', type=str, required=True, location='json'),
     parameter('pid', type=int, required=False, location='json'),
-    parameter('funds_target', type=float, required=True, location='json'),
+    parameter('funds_target', type=str, required=True, location='json'),
     parameter('addr_receiving', type=str, required=True, location='json'),
     parameter('category', type=str, required=True, location='json'),
     parameter('status', type=int, required=True, location='json', default=1)
@@ -99,8 +99,9 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
     if current_user.is_anonymous:
         return make_response(jsonify('err'), 500)
 
-    if len(title) <= 10:
+    if len(title) <= 8:
         return make_response(jsonify('title too short'), 500)
+
     if len(content) <= 20:
         return make_response(jsonify('content too short'), 500)
 
@@ -114,11 +115,13 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
         return make_response(jsonify('no rights to change status'), 500)
 
     try:
-        from wowfunding.bin.anti_xss import such_xss
+        from funding.bin.anti_xss import such_xss
         content_escaped = such_xss(content)
         html = markdown2.markdown(content_escaped, safe_mode=True)
     except Exception as ex:
         return make_response(jsonify('markdown error'), 500)
+
+
 
     if pid:
         p = Proposal.find_by_id(pid=pid)
@@ -146,13 +149,22 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
 
         p.status = status
         p.last_edited = datetime.now()
+
+
     else:
-        if funds_target <= 1:
-            return make_response(jsonify('proposal asking less than 1 error :)'), 500)
+        try: 
+            funds_target = float(funds_target) 
+        except Exception as ex:
+            return make_response(jsonify('letters detected'),500)
+        if funds_target < 1:
+                return make_response(jsonify('Proposal asking less than 1 error :)'), 500)
         if len(addr_receiving) != 97:
-            return make_response(jsonify('faulty addr_receiving address, should be of length 72'), 500)
+            return make_response(jsonify('Faulty address, should be of length 72'), 500)
 
         p = Proposal(headline=title, content=content, category='misc', user=current_user)
+        proposalID = current_user
+        addr_donation = Proposal.generate_proposal_subaccount(proposalID)
+        p.addr_donation = addr_donation
         p.html = html
         p.last_edited = datetime.now()
         p.funds_target = funds_target
@@ -160,12 +172,14 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
         p.category = category
         p.status = status
         db_session.add(p)
+    
+
 
     db_session.commit()
     db_session.flush()
 
     # reset cached statistics
-    from wowfunding.bin.utils import Summary
+    from funding.bin.utils import Summary
     Summary.fetch_stats(purge=True)
 
     return make_response(jsonify({'url': url_for('proposal', pid=p.id)}))
@@ -254,7 +268,7 @@ def login(username, password):
     if request.method == 'GET':
         return make_response(render_template('login.html'))
 
-    from wowfunding.factory import bcrypt
+    from funding.factory import bcrypt
     user = User.query.filter_by(username=username).first()
     if user is None or not bcrypt.check_password_hash(user.password, password):
         flash('Username or Password is invalid', 'error')

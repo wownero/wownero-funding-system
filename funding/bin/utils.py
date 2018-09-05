@@ -1,44 +1,39 @@
 from datetime import datetime, date
-
 import requests
 from flask import g
 from flask.json import JSONEncoder
-
+import json
 import settings
-
 
 def json_encoder(obj):
     if isinstance(obj, (datetime, date)):
         return obj.isoformat()
     raise TypeError ("Type %s not serializable" % type(obj))
 
-
 class Summary:
     @staticmethod
     def fetch_prices():
-        if hasattr(g, 'wowfunding_prices') and g.wow_prices:
-            return g.wow_prices
-
-        from wowfunding.factory import cache
-        cache_key = 'wowfunding_prices'
+        if hasattr(g, 'funding_prices') and g.coin_prices:
+            return g.coin_prices
+        from funding.factory import cache
+        cache_key = 'funding_prices'
         data = cache.get(cache_key)
         if data:
             return data
         data = {
-            'wow-btc': price_tradeogre_wow_btc(),
+            'coin-btc': coin_btc_value(),
             'btc-usd': price_cmc_btc_usd()
         }
-
         cache.set(cache_key, data=data, expiry=7200)
-        g.wow_prices = data
+        g.coin_prices = data
         return data
 
     @staticmethod
     def fetch_stats(purge=False):
-        from wowfunding.factory import db_session
-        from wowfunding.orm.orm import Proposal, User, Comment
-        from wowfunding.factory import cache
-        cache_key = 'wowfunding_stats'
+        from funding.factory import db_session
+        from funding.orm.orm import Proposal, User, Comment
+        from funding.factory import cache
+        cache_key = 'funding_stats'
         data = cache.get(cache_key)
         if data and not purge:
             return data
@@ -65,7 +60,6 @@ class Summary:
         cache.set(cache_key, data=data, expiry=300)
         return data
 
-
 def price_cmc_btc_usd():
     headers = {'User-Agent': 'Mozilla/5.0 (Android 4.4; Mobile; rv:41.0) Gecko/41.0 Firefox/41.0'}
     try:
@@ -75,8 +69,7 @@ def price_cmc_btc_usd():
     except:
         return
 
-
-def price_tradeogre_wow_btc():
+def coin_btc_value():
     headers = {'User-Agent': 'Mozilla/5.0 (Android 4.4; Mobile; rv:41.0) Gecko/41.0 Firefox/41.0'}
     try:
         r = requests.get('https://tradeogre.com/api/v1/ticker/BTC-WOW', headers=headers)
@@ -85,9 +78,8 @@ def price_tradeogre_wow_btc():
     except:
         return
 
-
-def wow_to_usd(wows: float, usd_per_btc: float, btc_per_wow: float):
+def coin_to_usd(amt: float, usd_per_btc: float, btc_per_coin: float):
     try:
-        return round(usd_per_btc / (1.0 / (wows * btc_per_wow)), 2)
+        return round(usd_per_btc / (1.0 / (amt * btc_per_coin)), 2)
     except:
         pass

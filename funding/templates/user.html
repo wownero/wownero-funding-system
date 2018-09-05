@@ -4,35 +4,62 @@
 {% if user %}
 <div class="container">
     <div class="row">
-        <div class="col-lg-8">
+        <div class="col-lg-12">
             <span class="form-text text-muted" style="margin-top: -2px;">
-                Details for '{{user.username}}'
+                Proposals made by '{{user.username}}'
             </span>
         </div>
     </div>
     <div class="row">
-        <div class="col-lg-8">
+        <div class="col-lg-12">
             {% if user.proposals %}
                 <table class="table table-proposal table-hover" style="margin-bottom:6px;">
                     <tbody>
-                        {% for p in user.proposals %}
+                        <th>Proposal</th>                        
+                        <th>Category</th>
+                        <th>Target Amount</th>
+                        <th>Amount Raised</th>
+                        <th>Date</th>
+                        {% for p in user.proposals | sort(attribute='date_added', reverse=True) %}
                         <tr>
-                            <td><b><a href="/proposal/{{ p.id }}">{{ p.headline }}</a></b></td>
-                            <td><a href="/user/{{ p.user.username }}">{{ p.user.username }}</a></td>
+                            <td><b><a href="/proposal/{{ p.id }}">{{ p.headline | truncate(42)}}</a></b></td>
+                            <td><a href="/proposals?cat={{ p.category }}">{{ p.category |capitalize}}</a></td>
+                            <td>{{p.funds_target}}</td>
+                            <td>{{p.funds_progress | round(3, 'floor')}}%</td>
                             <td>{{ p.date_added.strftime('%Y-%m-%d') }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             {% else %}
-                This user did not submit any proposals yet.
+                This user has not submitted any proposals yet.
+            {% endif %}
+                    <hr>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            Comments made by {{user.username}}
+            {% if user.comments %}
+                <table class="table table-proposal table-hover" style="margin-bottom:6px;">
+                    <tbody>
+                        <th>Comment</th>
+                        <th>Proposal</th>
+                        <th>Date</th>
+                        {% for y in user.comments | sort(attribute='date_added', reverse=True) %}
+                        <tr>
+                            <td><b><a href="/proposal/{{y.proposal.id}}#comment-{{ y.id }}">{{ y.message | truncate(32)}}</a></b></td>
+                            <td><a href="/proposal/{{y.proposal.id}}">#{{y.proposal.id }} {{ y.proposal.headline | truncate(32) }}</a></td>
+                            <td>{{ y.date_added.strftime('%Y-%m-%d') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                This user has not submitted any proposals yet.
             {% endif %}
         </div>
-
-        {% include 'sidebar.html' %}
-
     </div>
-
     <br>
 
 </div>
