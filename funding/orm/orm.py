@@ -1,12 +1,10 @@
 from datetime import datetime
-
 import sqlalchemy as sa
 from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 import settings
 
 base = declarative_base(name="Model")
-
 
 class User(base):
     __tablename__ = "users"
@@ -17,11 +15,10 @@ class User(base):
     registered_on = sa.Column(sa.DateTime)
     admin = sa.Column(sa.Boolean, default=False)
     proposals = relationship('Proposal', back_populates="user")
-
     comments = relationship("Comment", back_populates="user")
 
     def __init__(self, username, password, email):
-        from wowfunding.factory import bcrypt
+        from funding.factory import bcrypt
         self.username = username
         self.password = bcrypt.generate_password_hash(password).decode('utf8')
         self.email = email
@@ -47,12 +44,12 @@ class User(base):
         return self.id
 
     def __repr__(self):
-        return '<User %r>' % self.username
+        return self.username
 
     @classmethod
     def add(cls, username, password, email):
-        from wowfunding.factory import db_session
-        from wowfunding.validation import val_username, val_email
+        from funding.factory import db_session
+        from funding.validation import val_username, val_email
 
         try:
             # validate incoming username/email
@@ -134,7 +131,7 @@ class Proposal(base):
 
     @classmethod
     def find_by_id(cls, pid: int):
-        from wowfunding.factory import db_session
+        from funding.factory import db_session
         q = cls.query
         q = q.filter(Proposal.id == pid)
         result = q.first()
@@ -142,28 +139,28 @@ class Proposal(base):
             return
 
         # check if we have a valid addr_donation generated. if not, make one.
-        if not result.addr_donation and result.status >= 2:
+        if not result.addr_donation and result.status == 2:
+            from funding.bin.daemon import Daemon
             Proposal.generate_donation_addr(result)
-
         return result
 
     @property
     def funds_target_usd(self):
-        from wowfunding.bin.utils import Summary, wow_to_usd
+        from funding.bin.utils import Summary, coin_to_usd
         prices = Summary.fetch_prices()
         if not prices:
             return
-        return wow_to_usd(wows=self.funds_target, btc_per_wow=prices['wow-btc'], usd_per_btc=prices['btc-usd'])
+        return coin_to_usd(amt=self.funds_target, btc_per_coin=prices['coin-btc'], usd_per_btc=prices['btc-usd'])
 
     @property
     def comment_count(self):
-        from wowfunding.factory import db_session
+        from funding.factory import db_session
         q = db_session.query(sa.func.count(Comment.id))
         q = q.filter(Comment.proposal_id == self.id)
         return q.scalar()
 
     def get_comments(self):
-        from wowfunding.factory import db_session
+        from funding.factory import db_session
         q = db_session.query(Comment)
         q = q.filter(Comment.proposal_id == self.id)
         q = q.filter(Comment.replied_to == None)
@@ -184,46 +181,86 @@ class Proposal(base):
     def balance(self):
         """This property retrieves the current funding status
         of this proposal. It uses Redis cache to not spam the
-        wownerod too much. Returns a nice dictionary containing
+        daemon too much. Returns a nice dictionary containing
         all relevant proposal funding info"""
-        from wowfunding.bin.utils import Summary, wow_to_usd
-        from wowfunding.factory import cache, db_session
+        from funding.bin.utils import Summary, coin_to_usd
+        from funding.factory import cache, db_session
         rtn = {'sum': 0.0, 'txs': [], 'pct': 0.0}
 
-        cache_key = 'wow_balance_pid_%d' % self.id
+        cache_key = 'coin_balance_pid_%d' % self.id
         data = cache.get(cache_key)
         if not data:
-            from wowfunding.bin.daemon import WowneroDaemon
+            from funding.bin.daemon import Daemon
             try:
-                data = WowneroDaemon().get_transfers_in(index=self.id)
+                data = Daemon().get_transfers_in(proposal=self)
                 if not isinstance(data, dict):
-                    print('error; get_transfers; %d' % self.id)
+                    print('error; get_transfers_in; %d' % self.id)
                     return rtn
                 cache.set(cache_key, data=data, expiry=300)
-            except:
-                print('error; get_transfers; %d' % self.id)
+            except Exception as ex:
+                print('error; get_transfers_in; %d' % self.id)
                 return rtn
 
         prices = Summary.fetch_prices()
         for tx in data['txs']:
             if prices:
-                tx['amount_usd'] = wow_to_usd(wows=tx['amount_human'], btc_per_wow=prices['wow-btc'], usd_per_btc=prices['btc-usd'])
+                tx['amount_usd'] = coin_to_usd(amt=tx['amount_human'], btc_per_coin=prices['coin-btc'], usd_per_btc=prices['btc-usd'])
             tx['datetime'] = datetime.fromtimestamp(tx['timestamp'])
 
         if data.get('sum', 0.0):
             data['pct'] = 100 / float(self.funds_target / data.get('sum', 0.0))
-            data['remaining'] = data['sum'] - self.funds_withdrew
+            data['available'] = data['sum']
         else:
             data['pct'] = 0.0
-            data['remaining'] = 0.0
+            data['available'] = 0.0
 
         if data['pct'] != self.funds_progress:
             self.funds_progress = data['pct']
             db_session.commit()
             db_session.flush()
 
-        if data['remaining']:
-            data['remaining_pct'] = 100 / float(data['sum'] / data['remaining'])
+        if data['available']:
+            data['remaining_pct'] = 100 / float(data['sum'] / data['available'])
+        else:
+            data['remaining_pct'] = 0.0
+
+        return data
+
+    @property
+    def spends(self):
+        from funding.bin.utils import Summary, coin_to_usd
+        from funding.factory import cache, db_session
+        rtn = {'sum': 0.0, 'txs': [], 'pct': 0.0}
+
+        cache_key = 'coin_spends_pid_%d' % self.id
+        data = cache.get(cache_key)
+        if not data:
+            from funding.bin.daemon import Daemon
+            try:
+                data = Daemon().get_transfers_out(proposal=self)
+                if not isinstance(data, dict):
+                    print('error; get_transfers_out; %d' % self.id)
+                    return rtn
+                cache.set(cache_key, data=data, expiry=300)
+            except:
+                print('error; get_transfers_out; %d' % self.id)
+                return rtn
+
+        prices = Summary.fetch_prices()
+        for tx in data['txs']:
+            if prices:
+                tx['amount_usd'] = coin_to_usd(amt=tx['amount_human'], btc_per_coin=prices['coin-btc'], usd_per_btc=prices['btc-usd'])
+            tx['datetime'] = datetime.fromtimestamp(tx['timestamp'])
+
+        if data.get('sum', 0.0):
+            data['pct'] = 100 / float(self.funds_target / data.get('sum', 0.0))
+            data['spent'] = data['sum']
+        else:
+            data['pct'] = 0.0
+            data['spent'] = 0.0
+
+        if data['spent']:
+            data['remaining_pct'] = 100 / float(data['sum'] / data['spent'])
         else:
             data['remaining_pct'] = 0.0
 
@@ -231,28 +268,30 @@ class Proposal(base):
 
     @staticmethod
     def generate_donation_addr(cls):
-        from wowfunding.factory import db_session
-        from wowfunding.bin.daemon import WowneroDaemon
+        from funding.factory import db_session
+        from funding.bin.daemon import Daemon
         if cls.addr_donation:
             return cls.addr_donation
 
-        try:
-            addr_donation = WowneroDaemon().get_address(index=cls.id)
-            if not isinstance(addr_donation, dict):
-                raise Exception('get_address, needs dict; %d' % cls.id)
-        except Exception as ex:
-            print('error: %s' % str(ex))
-            return
+        # check if the current user has an account in the wallet
+        account = Daemon().get_accounts(cls.id)
+        if not account:
+            account = Daemon().create_account(cls.id)
+        index = account['account_index']
 
-        if addr_donation.get('address'):
-            cls.addr_donation = addr_donation['address']
-            db_session.commit()
-            db_session.flush()
-            return addr_donation['address']
+        address = account.get('address') or account.get('base_address')
+        if not address:
+            raise Exception('Cannot generate account/address for pid %d' % cls.id)
+
+        # assign donation address, commit to db
+        cls.addr_donation = address
+        db_session.commit()
+        db_session.flush()
+        return address
 
     @classmethod
     def find_by_args(cls, status: int = None, cat: str = None, limit: int = 20, offset=0):
-        from wowfunding.factory import db_session
+        from funding.factory import db_session
         if isinstance(status, int) and status not in settings.FUNDING_STATUSES.keys():
             raise NotImplementedError('invalid status')
         if isinstance(cat, str) and cat not in settings.FUNDING_CATEGORIES:
@@ -298,7 +337,7 @@ class Payout(base):
         from flask.ext.login import current_user
         if not current_user.admin:
             raise Exception("user must be admin to add a payout")
-        from wowfunding.factory import db_session
+        from funding.factory import db_session
 
         try:
             payout = Payout(propsal_id=proposal_id, amount=amount, to_address=to_address)
@@ -339,17 +378,17 @@ class Comment(base):
 
     @property
     def ago(self):
-        from wowfunding.bin.utils_time import TimeMagic
+        from funding.bin.utils_time import TimeMagic
         return TimeMagic().ago(self.date_added)
 
     @staticmethod
     def find_by_id(cid: int):
-        from wowfunding.factory import db_session
+        from funding.factory import db_session
         return db_session.query(Comment).filter(Comment.id == cid).first()
 
     @staticmethod
     def remove(cid: int):
-        from wowfunding.factory import db_session
+        from funding.factory import db_session
         from flask.ext.login import current_user
         if current_user.id != user_id and not current_user.admin:
             raise Exception("no rights to remove this comment")
@@ -364,7 +403,7 @@ class Comment(base):
 
     @staticmethod
     def lock(cid: int):
-        from wowfunding.factory import db_session
+        from funding.factory import db_session
         from flask.ext.login import current_user
         if not current_user.admin:
             raise Exception("admin required")
@@ -383,7 +422,7 @@ class Comment(base):
     @classmethod
     def add_comment(cls, pid: int, user_id: int, message: str, cid: int = None, message_id: int = None, automated=False):
         from flask.ext.login import current_user
-        from wowfunding.factory import db_session
+        from funding.factory import db_session
         if not message:
             raise Exception("empty message")
 

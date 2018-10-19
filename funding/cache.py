@@ -4,7 +4,7 @@ import redis
 from flask_session import RedisSessionInterface
 
 import settings
-from wowfunding.bin.utils import json_encoder
+from funding.bin.utils import json_encoder
 
 
 def redis_args():

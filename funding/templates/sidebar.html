@@ -71,6 +71,21 @@
         </div>
     </div>
 
+    <!-- Side Widget -->
+    <div class="card my-4">
+        <h5 class="card-header">Newest Users</h5>
+        <div class="card-body">
+            <ul class="b">
+
+                {% for user in newest_users %}
+                <li>
+                    <a href="/user/{{ user.username }}"> {{ user.username }} </a> 
+                </li>
+                </a>
+                {% endfor %}
+            </li>
+        </div>
+    </div>
     <script>
         var search_input = document.getElementById("search_input");
 
