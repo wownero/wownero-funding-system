@@ -121,8 +121,6 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
     except Exception as ex:
         return make_response(jsonify('markdown error'), 500)
 
-
-
     if pid:
         p = Proposal.find_by_id(pid=pid)
         if not p:
@@ -149,8 +147,6 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
 
         p.status = status
         p.last_edited = datetime.now()
-
-
     else:
         try: 
             funds_target = float(funds_target) 
@@ -162,18 +158,18 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
             return make_response(jsonify('Faulty address, should be of length 72'), 500)
 
         p = Proposal(headline=title, content=content, category='misc', user=current_user)
-        proposalID = current_user
-        addr_donation = Proposal.generate_proposal_subaccount(proposalID)
-        p.addr_donation = addr_donation
         p.html = html
         p.last_edited = datetime.now()
         p.funds_target = funds_target
         p.addr_receiving = addr_receiving
         p.category = category
         p.status = status
-        db_session.add(p)
-    
 
+        db_session.add(p)
+        db_session.commit()
+        db_session.flush()
+
+        p.addr_donation = Proposal.generate_donation_addr(p)
 
     db_session.commit()
     db_session.flush()

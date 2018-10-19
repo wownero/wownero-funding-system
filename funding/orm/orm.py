@@ -139,9 +139,9 @@ class Proposal(base):
             return
 
         # check if we have a valid addr_donation generated. if not, make one.
-        if not result.addr_donation and result.status >= 2:
+        if not result.addr_donation and result.status == 2:
+            from funding.bin.daemon import Daemon
             Proposal.generate_donation_addr(result)
-
         return result
 
     @property
@@ -192,12 +192,12 @@ class Proposal(base):
         if not data:
             from funding.bin.daemon import Daemon
             try:
-                data = Daemon().get_transfers_in(index=self.id, proposal_id=self.id)
+                data = Daemon().get_transfers_in(proposal=self)
                 if not isinstance(data, dict):
                     print('error; get_transfers_in; %d' % self.id)
                     return rtn
                 cache.set(cache_key, data=data, expiry=300)
-            except:
+            except Exception as ex:
                 print('error; get_transfers_in; %d' % self.id)
                 return rtn
 
@@ -237,7 +237,7 @@ class Proposal(base):
         if not data:
             from funding.bin.daemon import Daemon
             try:
-                data = Daemon().get_transfers_out(index=self.id, proposal_id=self.id)
+                data = Daemon().get_transfers_out(proposal=self)
                 if not isinstance(data, dict):
                     print('error; get_transfers_out; %d' % self.id)
                     return rtn
@@ -273,29 +273,21 @@ class Proposal(base):
         if cls.addr_donation:
             return cls.addr_donation
 
-        try:
-            addr_donation = Daemon().get_address(index=cls.id, proposal_id=cls.id)
-            if not isinstance(addr_donation, dict):
-                raise Exception('get_address, needs dict; %d' % cls.id)
-        except Exception as ex:
-            print('error: %s' % str(ex))
-            return
+        # check if the current user has an account in the wallet
+        account = Daemon().get_accounts(cls.id)
+        if not account:
+            account = Daemon().create_account(cls.id)
+        index = account['account_index']
 
-        if addr_donation.get('address'):
-            cls.addr_donation = addr_donation['address']
-            db_session.commit()
-            db_session.flush()
-            return addr_donation['address']
+        address = account.get('address') or account.get('base_address')
+        if not address:
+            raise Exception('Cannot generate account/address for pid %d' % cls.id)
 
-    @staticmethod  
-    def generate_proposal_subaccount(pid):
-        from funding.bin.daemon import Daemon
-
-        try:
-            Daemon().create_account(pid)
-        except Exception as ex:
-            print('error: %s' % str(ex))
-            return
+        # assign donation address, commit to db
+        cls.addr_donation = address
+        db_session.commit()
+        db_session.flush()
+        return address
 
     @classmethod
     def find_by_args(cls, status: int = None, cat: str = None, limit: int = 20, offset=0):
