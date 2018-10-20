@@ -52,7 +52,7 @@
             </p>
 
             <hr>
-            {% if proposal.status >= 2 %}
+            {% if proposal.status in [2,3] %}
             <div class="row">
                 <div class="col-md-12">
                     <div class="card my-4">
