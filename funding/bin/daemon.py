@@ -131,7 +131,7 @@ class Daemon:
 
         data = {
             "method": "get_transfers",
-            "params": {"pool": True, "out": True, "account_index": index},
+            "params": {"pool": False, "out": True, "account_index": index},
             "jsonrpc": "2.0",
             "id": "0",
         }
