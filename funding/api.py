@@ -46,16 +46,19 @@ def api_qr_generate(address):
     """
     from funding.factory import cache
 
-    throttling_seconds = 3
-    ip = get_ip()
-    cache_key = 'qr_ip_%s' % ip
-    hit = cache.get(cache_key)
-    if hit and ip not in ['127.0.0.1', 'localhost']:
-        return Response('Wait a bit before generating a new QR', 403)
-    cache.set(cache_key, {}, throttling_seconds)
-
     qr = QrCodeGenerator()
     if not qr.exists(address):
+        # create a new QR code
+        ip = get_ip()
+        cache_key = 'qr_ip_%s' % ip
+        hit = cache.get(cache_key)
+
+        if hit and ip not in ['127.0.0.1', 'localhost']:
+            return Response('Wait a bit before generating a new QR', 403)
+
+        throttling_seconds = 3
+        cache.set(cache_key, {'wow': 'kek'}, throttling_seconds)
+
         created = qr.create(address)
         if not created:
             raise Exception('Could not create QR code')
