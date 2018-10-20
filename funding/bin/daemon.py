@@ -102,7 +102,8 @@ class Daemon:
         }
 
         data = self._make_request(data)
-        data = data['result'].get('in', [])
+        data = data['result']
+        data = data.get('in', []) + data.get('pool', [])
 
         # filter by current proposal
         txs = [tx for tx in data if tx.get('address') == address['address']]
@@ -136,7 +137,8 @@ class Daemon:
         }
 
         data = self._make_request(data)
-        data = data['result'].get('out', [])
+        data = data['result']
+        data = data.get('out', []) + data.get('pool', [])
 
         # filter by current proposal
         txs = [tx for tx in data if tx.get('address') == address['address']]
