@@ -135,12 +135,12 @@ body {
 }
 
 .table-hover tbody tr:hover {
-    background-color: rgba(0,0,0,.075);
+    background-color: rgba(0,0,0,.055);
 }
 
 .table th, .table td {
-    border-top: 1px solid #008926;
-    padding-top: .3rem;
+    border-top: 1px solid #00000029;
+    padding-top: .65rem;
 }
 
 .table-tilted{
@@ -169,7 +169,7 @@ body {
 }
 
 .table thead th {
-    border-bottom: 1px solid #008926 !important;
+    border-bottom: 1px solid #00000029 !important;
     border-top: none;
     font-size: 14px;
 }
@@ -612,4 +612,8 @@ ul.b {
 .proposal_qr{
     margin-top:8px;
     margin-bottom:8px;
+}
+
+.table-proposal tr {
+    background: #00000005;
 }
