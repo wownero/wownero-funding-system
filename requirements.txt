@@ -9,3 +9,6 @@ gunicorn
 psycopg2
 markdown2
 requests
+pyqrcode
+pypng
+pillow-simd

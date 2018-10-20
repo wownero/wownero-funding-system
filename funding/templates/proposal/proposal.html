@@ -95,20 +95,20 @@
                                     <hr>
                                 </div>
                                 <div class="col-lg-8">
-                                    {{proposal.balance['available']|round(3) or 0 }} WOW Raised 
-                                    {% if (proposal.funds_target-proposal.balance['available']|float|round(3)) > 0 %} 
+                                    {{proposal.balance['available']|round(3) or 0 }} WOW Raised
+                                    {% if (proposal.funds_target-proposal.balance['available']|float|round(3)) > 0 %}
                                         ({{ (proposal.funds_target-proposal.balance['available']|float|round(3)|int) }} WOW until goal)
-                                        {% else %} 
+                                        {% else %}
                                         ({{ (proposal.balance['available']-proposal.funds_target|float|round(3)|int) }} WOW past goal!)
                                     {% endif %}
                                     <div class="progress">
                                         <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.balance['pct']}}%;">
-                                        </div> 
+                                        </div>
                                     </div>
                                     <hr>
                                 </div>
                                 <br/>
-                                
+
                                 <br/>
                                 <div class="col-lg-8">
                                     {{proposal.spends['spent']|round(3) or 0}} WOW Paid out
@@ -134,6 +134,12 @@
                                     Donation address:
                                     <pre class="proposal_address">{% if proposal.addr_donation %}{{ proposal.addr_donation }}{% else %}<small>None generated yet</small>{% endif %}</pre>
                                 </div>
+
+                                {% if proposal.addr_donation %}
+                                <div class="col-lg-12">
+                                    <img class="proposal_qr" src="/api/1/qr?address={{ proposal.addr_donation }}">
+                                </div>
+                                {%  endif %}
                             </div>
                         </div>
                     </div>

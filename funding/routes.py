@@ -154,7 +154,7 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
             return make_response(jsonify('letters detected'),500)
         if funds_target < 1:
                 return make_response(jsonify('Proposal asking less than 1 error :)'), 500)
-        if len(addr_receiving) != 97:
+        if len(addr_receiving) != settings.COIN_ADDRESS_LENGTH:
             return make_response(jsonify('Faulty address, should be of length 72'), 500)
 
         p = Proposal(headline=title, content=content, category='misc', user=current_user)
@@ -208,6 +208,7 @@ def user(name):
     user = q.first()
     return render_template('user.html', user=user)
 
+
 @app.route('/proposals')
 @endpoint.api(
     parameter('status', type=int, location='args', required=False),
@@ -233,6 +234,7 @@ def proposals(status, page, cat):
 
     return make_response(render_template('proposal/proposals.html',
                                          proposals=proposals, status=status, cat=cat))
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
