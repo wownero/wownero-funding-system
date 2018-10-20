@@ -57,5 +57,5 @@ class WowCache:
         except:
             return {}
 
-    def set(self, key: str, data: dict, expiry = 300):
+    def set(self, key: str, data: dict, expiry=300):
         self._cache.set(key, json.dumps(data, default=json_encoder), ex=expiry)

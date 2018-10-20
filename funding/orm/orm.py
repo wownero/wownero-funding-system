@@ -196,7 +196,7 @@ class Proposal(base):
                 if not isinstance(data, dict):
                     print('error; get_transfers_in; %d' % self.id)
                     return rtn
-                cache.set(cache_key, data=data, expiry=300)
+                cache.set(cache_key, data=data, expiry=60)
             except Exception as ex:
                 print('error; get_transfers_in; %d' % self.id)
                 return rtn
@@ -241,7 +241,7 @@ class Proposal(base):
                 if not isinstance(data, dict):
                     print('error; get_transfers_out; %d' % self.id)
                     return rtn
-                cache.set(cache_key, data=data, expiry=300)
+                cache.set(cache_key, data=data, expiry=60)
             except:
                 print('error; get_transfers_out; %d' % self.id)
                 return rtn
