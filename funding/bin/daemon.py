@@ -102,7 +102,8 @@ class Daemon:
         }
 
         data = self._make_request(data)
-        data = data['result'].get('in', [])
+        data = data['result']
+        data = data.get('in', []) + data.get('pool', [])
 
         # filter by current proposal
         txs = [tx for tx in data if tx.get('address') == address['address']]
@@ -130,13 +131,14 @@ class Daemon:
 
         data = {
             "method": "get_transfers",
-            "params": {"pool": True, "out": True, "account_index": index},
+            "params": {"pool": False, "out": True, "account_index": index},
             "jsonrpc": "2.0",
             "id": "0",
         }
 
         data = self._make_request(data)
-        data = data['result'].get('out', [])
+        data = data['result']
+        data = data.get('out', []) + data.get('pool', [])
 
         # filter by current proposal
         txs = [tx for tx in data if tx.get('address') == address['address']]
@@ -150,10 +152,10 @@ class Daemon:
         }
 
     def _make_request(self, data):
-        if self.username:
-            if self.password:
-                r = requests.post(self.url, auth=HTTPDigestAuth(settings.RPC_USERNAME, settings.RPC_PASSWORD), json=data, headers=self.headers)
-        else:
-            r = requests.post(self.url, json=data, headers=self.headers)
+        options = {'json': data, 'headers': self.headers}
+        if self.username and self.password:
+            options['auth'] = HTTPDigestAuth(settings.RPC_USERNAME, settings.RPC_PASSWORD)
+
+        r = requests.post(self.url, **options)
         r.raise_for_status()
         return r.json()

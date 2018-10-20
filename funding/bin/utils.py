@@ -30,7 +30,7 @@ class Summary:
             'coin-btc': coin_btc_value(),
             'btc-usd': price_cmc_btc_usd()
         }
-        cache.set(cache_key, data=data, expiry=7200)
+        cache.set(cache_key, data=data, expiry=1200)
         g.coin_prices = data
         return data
 

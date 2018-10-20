@@ -196,7 +196,7 @@ class Proposal(base):
                 if not isinstance(data, dict):
                     print('error; get_transfers_in; %d' % self.id)
                     return rtn
-                cache.set(cache_key, data=data, expiry=300)
+                cache.set(cache_key, data=data, expiry=60)
             except Exception as ex:
                 print('error; get_transfers_in; %d' % self.id)
                 return rtn
@@ -241,12 +241,14 @@ class Proposal(base):
                 if not isinstance(data, dict):
                     print('error; get_transfers_out; %d' % self.id)
                     return rtn
-                cache.set(cache_key, data=data, expiry=300)
+                cache.set(cache_key, data=data, expiry=60)
             except:
                 print('error; get_transfers_out; %d' % self.id)
                 return rtn
 
+        data['remaining_pct'] = 0.0
         prices = Summary.fetch_prices()
+
         for tx in data['txs']:
             if prices:
                 tx['amount_usd'] = coin_to_usd(amt=tx['amount_human'], btc_per_coin=prices['coin-btc'], usd_per_btc=prices['btc-usd'])
@@ -259,10 +261,10 @@ class Proposal(base):
             data['pct'] = 0.0
             data['spent'] = 0.0
 
-        if data['spent']:
-            data['remaining_pct'] = 100 / float(data['sum'] / data['spent'])
-        else:
-            data['remaining_pct'] = 0.0
+        cache_key_in = 'coin_balance_pid_%d' % self.id
+        data_in = cache.get(cache_key_in)
+        if data_in and data['spent']:
+            data['remaining_pct'] = 100 / float(data_in['sum'] / data['spent'])
 
         return data
 
