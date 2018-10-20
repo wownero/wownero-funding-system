@@ -95,11 +95,14 @@
                                 </div>
                                 <div class="col-lg-8">
                                     {{proposal.balance['available']|round(3) or 0 }} WOW Raised
-                                    {% if (proposal.funds_target-proposal.balance['available']|float|round(3)) > 0 %}
-                                        ({{ (proposal.funds_target-proposal.balance['available']|float|round(3)|int) }} WOW until goal)
-                                        {% else %}
+                                    {% set remaining = proposal.funds_target - proposal.balance['available']|float|round(3) %}
+
+                                    {% if remaining > 0 %}
+                                        ({{ (proposal.funds_target - proposal.balance['available']|float|round(3)|int) }} WOW until goal)
+                                    {% elif remaining < 0 %}
                                         ({{ (proposal.balance['available']-proposal.funds_target|float|round(3)|int) }} WOW past goal!)
                                     {% endif %}
+
                                     <div class="progress">
                                         <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.balance['pct']}}%;">
                                         </div>
@@ -112,7 +115,7 @@
                                 <div class="col-lg-8">
                                     {{proposal.spends['spent']|round(3) or 0}} WOW Paid out
                                     <div class="progress">
-                                        <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.spends['spent_remaining_pct']}}%;">
+                                        <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.spends['remaining_pct']}}%;">
                                         </div>
                                     </div>
                                     <hr>
@@ -201,36 +204,51 @@
     {% endif %}
 
 
-{% if proposal.spends['txs'] %}
+    {% if proposal.spends['txs'] %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card my-6" id="incoming_txs">
+                    <h5 class="card-header">Outgoing transactions <small>({{proposal.spends['txs']|length}})</small></h5>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            {% for tx in proposal.spends['txs'] %}
+                            <li class="list-group-item">
+                                {{tx['datetime'].strftime('%Y-%m-%d %H:%M')}}
+                                <span style="float:right"><b>Blockheight</b>: {{tx['height']}}</span>
+                                <br>
+                                <a target="_blank" href="https://explore.wownero.com/tx/{{tx['txid']}}">{{tx['txid'][:32]}}...</a>
+                                <span style="float:right;color:#890000;font-weight:bold;">
+                                    - {{tx['amount_human']|round(3)}} WOW
+                                    {% if 'amount_usd' in tx %}
+                                    <small style="color: black">
+                                        ➞ $ {{tx['amount_usd']}}
+                                    </small>
+                                    {% endif %}
+                                </span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!-- /.row -->
+    {% endif %}
+
+    {% from 'proposal/macros/comment.html' import comment_entry %}
+
     <div class="row">
         <div class="col-md-12">
             <div class="card my-6" id="incoming_txs">
-                <h5 class="card-header">Outgoing transactions <small>({{proposal.spends['txs']|length}})</small></h5>
-                <div class="card-body">
-                    <ul class="list-group">
-                        {% for tx in proposal.spends['txs'] %}
-                        <li class="list-group-item">
-                            {{tx['datetime'].strftime('%Y-%m-%d %H:%M')}}
-                            <span style="float:right"><b>Blockheight</b>: {{tx['height']}}</span>
-                            <br>
-                            <a target="_blank" href="https://explore.wownero.com/tx/{{tx['txid']}}">{{tx['txid'][:32]}}...</a>
-                            <span style="float:right;color:#890000;font-weight:bold;">
-                                - {{tx['amount_human']|round(3)}} WOW
-                                {% if 'amount_usd' in tx %}
-                                <small style="color: black">
-                                    ➞ $ {{tx['amount_usd']}}
-                                </small>
-                                {% endif %}
-                            </span>
-                        </li>
-                        {% endfor %}
-                    </ul>
+                <h5 id="comments" class="card-header">Events</h5>
+                <div class="card-body comments-panel">
+                    {% for c in proposal._comments if c.automated %}
+                        {{ comment_entry(c, proposal) }}
+                    {% endfor %}
                 </div>
             </div>
         </div>
     </div>
-    <!-- /.row -->
-    {% endif %}
 </div>
 
 <script>

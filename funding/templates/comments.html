@@ -1,3 +1,5 @@
+{% from 'proposal/macros/comment.html' import comment_entry %}
+
 <div class="row">
     <div class="col-md-12">
         <div class="card my-6" id="incoming_txs">
@@ -18,69 +20,14 @@
                         <input type="submit" value="add comment">
                     </form>
                 {% else %}
-                    You need to be logged in to comment.
+                    You need to be <a href="{{ url_for('login') }}">logged in</a> to comment.
                     <br>
                 {% endif %}
 
                 <br>
 
-                {% for c in proposal._comments %}
-                <!-- Single Comment -->
-                <div class="media mb-4 comment-container" id="comment-{{c.id}}">
-                    <div class="votearrow" title="upvote"></div>
-                    <div class="media-body">
-                        <span class="username">
-                            <a href="/user/{{ c.user.username }}">
-                                {{c.user.username}}
-                                {% if c.user.username == proposal.user.username %}
-                                <small>[op]</small>
-                                {% endif %}
-                                {% if c.user.admin %}
-                                <small>[admin]</small>
-                                {% endif %}
-                            </a>
-                        </span>
-                        <span class="date_posted">
-                            <a href="/proposal/{{proposal.id}}#comment-{{c.id}}">
-                                {{c.date_added.strftime('%Y-%m-%d %H:%M')}}
-                            </a>
-                        </span><br>
-                        <span data-id="{{c.id}}" class="body" style="{% if c.automated %}color:blue;{% endif %};word-break: break-all;">{{c.message}}</span>
-                        <br>
-                        {% if not c.automated %}
-                        <a class="reply" href="{{url_for('propsal_comment_reply', cid=c.id, pid=proposal.id)}}">reply</a>
-                        {% endif %}
-
-                        {% for _c in c.comments %}
-                        <div class="media mt-4 comment-container" id="comment-{{_c.id}}">
-                            <div class="votearrow" title="upvote"></div>
-                            <div class="media-body" id="comment">
-                                <span class="username">
-                                    <a href="/user/{{ _c.user.username }}">
-                                        {{_c.user.username}}
-                                        {% if _c.user.username == proposal.user.username %}
-                                        <small>[op]</small>
-                                        {% endif %}
-                                        {% if _c.user.admin %}
-                                        <small>[admin]</small>
-                                        {% endif %}
-
-                                    </a>
-                                </span>
-                                <span class="date_posted">
-                                    <a href="/proposal/{{proposal.id}}#comment-{{_c.id}}">
-                                        {{_c.date_added.strftime('%Y-%m-%d %H:%M')}}
-                                    </a>
-                                </span>
-                                <br>
-                                <span data-id="{{_c.id}}" class="body" style="word-break: break-all;">
-                                {{_c.message}}
-                                </span>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
+                {% for c in proposal._comments if not c.automated %}
+                    {{ comment_entry(c, proposal) }}
                 {% endfor %}
             </div>
         </div>
