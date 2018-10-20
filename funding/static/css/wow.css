@@ -608,3 +608,8 @@ ul.b {
 .wow_addy[data-active="true"]{
     cursor: default;
 }
+
+.proposal_qr{
+    margin-top:8px;
+    margin-bottom:8px;
+}

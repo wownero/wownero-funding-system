@@ -35,12 +35,14 @@ Expose wallet via RPC.
 Download application and configure.
 
 ```
-sudo apt install python-virtualenv python3 redis-server postgresql-server postgresql-server-dev-*
+sudo apt install libjpeg-dev libpng-dev python-virtualenv python3 redis-server postgresql-server postgresql-server-dev-*
 git clone https://github.com/skftn/wownero-wfs.git
-cd funding
+cd wownero-wfs
 virtualenv -p /usr/bin/python3
 source venv/bin/activate
+pip uninstall pillow
 pip install -r requirements.txt
+CC="cc -mavx2" pip install -U --force-reinstall pillow-simd
 cp settings.py_example settings.py
 - change settings accordingly
 ```
@@ -54,6 +56,8 @@ python run_dev.py
 ```
 
 Beware `run_dev.py` is meant as a development server.
+
+When running behind nginx/apache, inject `X-Forwarded-For`.
 
 ### Contributors
 

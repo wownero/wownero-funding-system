@@ -351,6 +351,7 @@ class Payout(base):
 
     @staticmethod
     def get_payouts(proposal_id):
+        from funding.factory import db_session
         return db_session.query(Payout).filter(Payout.proposal_id == proposal_id).all()
 
 

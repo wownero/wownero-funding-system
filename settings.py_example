@@ -7,6 +7,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SECRET = ''
 DEBUG = True
 
+COIN_ADDRESS_LENGTH = 97
 COINCODE = ''
 PSQL_USER = ''
 PSQL_PASS = ''
