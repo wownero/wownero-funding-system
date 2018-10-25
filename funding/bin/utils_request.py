@@ -1,9 +1,10 @@
 from datetime import datetime
-from flask import session, g
+from flask import session, g, request
 import settings
 from funding.bin.utils import Summary
 from funding.factory import app, db_session
 from funding.orm.orm import Proposal, User, Comment
+
 
 @app.context_processor
 def templating():
@@ -19,15 +20,21 @@ def templating():
                 recent_comments=recent_comments,
                 newest_users=newest_users)
 
+
 @app.before_request
 def before_request():
     pass
+
 
 @app.after_request
 def after_request(res):
     if hasattr(g, 'funding_prices'):
         delattr(g, 'funding_prices')
     res.headers.add('Accept-Ranges', 'bytes')
+
+    if request.full_path.startswith('/api/'):
+        res.headers.add('Access-Control-Allow-Origin', '*')
+
     if settings.DEBUG:
         res.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         res.headers['Pragma'] = 'no-cache'
@@ -35,9 +42,11 @@ def after_request(res):
         res.headers['Cache-Control'] = 'public, max-age=0'
     return res
 
+
 @app.teardown_appcontext
 def shutdown_session(**kwargs):
     db_session.remove()
+
 
 @app.errorhandler(404)
 def error(err):

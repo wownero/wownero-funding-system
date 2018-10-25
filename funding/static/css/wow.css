@@ -617,3 +617,39 @@ ul.b {
 .table-proposal tr {
     background: #00000005;
 }
+
+.tx_item {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    background: #ffffff80;
+}
+
+.tx_item .amount {
+    float:right;
+    font-weight:bold;
+    color:#890000;
+}
+
+.tx_item .amount.in {
+    color:#008926;
+}
+
+.tx_item .datetime {
+    font-size: 14px;
+    color: #999;
+}
+
+.tx_item .height {
+    float:right
+}
+
+.tx_item .height b {
+    font-size:14px;
+}
+
+.container>.content h1,
+.container>.content h2,
+.container>.content h3,
+.container>.content h4{
+    margin-bottom:20px;
+}

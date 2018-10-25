@@ -39,6 +39,12 @@ RPC_LOCATION = "http://{host}:{rpc_port}/json_rpc".format(host=RPC_HOST, rpc_por
 RPC_USERNAME = ""
 RPC_PASSWORD = ""
 
+RPC_HOST_DEVFUND = '127.0.0.1'
+RPC_PORT_DEVFUND = '45679'
+RPC_LOCATION_DEVFUND = "http://{host}:{rpc_port}/json_rpc".format(host=RPC_HOST, rpc_port=RPC_PORT)
+RPC_USERNAME_DEVFUND = None
+RPC_PASSWORD_DEVFUND = None
+
 FUNDING_CATEGORIES = [
     'wallets',
     'marketing',
