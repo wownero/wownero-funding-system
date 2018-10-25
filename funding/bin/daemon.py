@@ -6,10 +6,14 @@ from funding.orm.orm import User
 
 
 class Daemon:
-    def __init__(self):
-        self.url = settings.RPC_LOCATION
-        self.username = settings.RPC_USERNAME
-        self.password = settings.RPC_PASSWORD
+    def __init__(self, url=None, username=None, password=None):
+        if url is None:
+            self.url = settings.RPC_LOCATION
+        if username is None:
+            self.username = settings.RPC_USERNAME
+        if password is None:
+            self.password = settings.RPC_PASSWORD
+
         self.headers = {"User-Agent": "Mozilla"}
 
     def create_address(self, account_index, label_name):
