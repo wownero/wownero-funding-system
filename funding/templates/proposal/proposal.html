@@ -165,12 +165,7 @@
 
     {% include 'comments.html' %}
 
-    <style>
-        #incoming_txs li.list-group-item {
-            padding-top: 4px;
-            padding-bottom: 4px;
-        }
-    </style>
+    {% from 'proposal/macros/transaction.html' import tx_item %}
 
     {% if proposal.balance['txs'] %}
     <div class="row">
@@ -180,20 +175,7 @@
                 <div class="card-body">
                     <ul class="list-group">
                         {% for tx in proposal.balance['txs'] %}
-                        <li class="list-group-item">
-                            {{tx['datetime'].strftime('%Y-%m-%d %H:%M')}}
-                            <span style="float:right"><b>Blockheight</b>: {{tx['height']}}</span>
-                            <br>
-                            <a target="_blank" href="https://explore.wownero.com/tx/{{tx['txid']}}">{{tx['txid'][:32]}}...</a>
-                            <span style="float:right;color:#008926;font-weight:bold;">
-                                + {{tx['amount_human']|round(3)}} WOW
-                                {% if 'amount_usd' in tx %}
-                                <small style="color: black">
-                                    ➞ $ {{tx['amount_usd']}}
-                                </small>
-                                {% endif %}
-                            </span>
-                        </li>
+                            {{ tx_item(tx) }}
                         {% endfor %}
                     </ul>
                 </div>
@@ -203,7 +185,6 @@
     <!-- /.row -->
     {% endif %}
 
-
     {% if proposal.spends['txs'] %}
         <div class="row">
             <div class="col-md-12">
@@ -212,20 +193,7 @@
                     <div class="card-body">
                         <ul class="list-group">
                             {% for tx in proposal.spends['txs'] %}
-                            <li class="list-group-item">
-                                {{tx['datetime'].strftime('%Y-%m-%d %H:%M')}}
-                                <span style="float:right"><b>Blockheight</b>: {{tx['height']}}</span>
-                                <br>
-                                <a target="_blank" href="https://explore.wownero.com/tx/{{tx['txid']}}">{{tx['txid'][:32]}}...</a>
-                                <span style="float:right;color:#890000;font-weight:bold;">
-                                    - {{tx['amount_human']|round(3)}} WOW
-                                    {% if 'amount_usd' in tx %}
-                                    <small style="color: black">
-                                        ➞ $ {{tx['amount_usd']}}
-                                    </small>
-                                    {% endif %}
-                                </span>
-                            </li>
+                                {{ tx_item(tx) }}
                             {% endfor %}
                         </ul>
                     </div>

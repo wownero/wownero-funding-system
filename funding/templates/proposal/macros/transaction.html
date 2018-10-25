@@ -1,0 +1,28 @@
+{% macro tx_item(tx) %}
+<li class="list-group-item tx_item">
+    <span class="datetime">
+        {{tx['datetime'].strftime('%Y-%m-%d %H:%M')}}
+    </span>
+
+    <span class="height">
+        <b>Blockheight</b>: {{tx['height']}}</span>
+    <br>
+
+    <a target="_blank" href="https://explore.wownero.com/tx/{{tx['txid']}}">{{tx['txid'][:32]}}...</a>
+    <span class="amount{% if tx['type'] == 'in' %} in{% endif %}">
+        {% if tx['type'] == 'in' %}
+            +
+        {% else %}
+            -
+        {% endif %}
+
+        {{tx['amount_human']|round(3)}} WOW
+
+        {% if 'amount_usd' in tx %}
+        <small style="color: black">
+            ➞ $ {{tx['amount_usd']}}
+        </small>
+        {% endif %}
+    </span>
+</li>
+{% endmacro %}
