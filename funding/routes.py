@@ -238,8 +238,8 @@ def proposals(status, page, cat):
                                          proposals=proposals, status=status, cat=cat))
 
 
-@app.route('/fund')
-def devfund():
+@app.route('/donate')
+def donate():
     from funding.bin.daemon import Daemon
     from funding.factory import cache, db_session
 
