@@ -590,13 +590,6 @@ ul.b {
     background-color: #ffffffb0;
 }
 
-.comments-panel .comment-container .media-body span.body img{
-    max-width:500px;
-    max-height:600px;
-    display: inline;
-    width: 100%;
-}
-
 .wow_addy{
     color: red;
     cursor: pointer;
@@ -663,6 +656,10 @@ ul.b {
 }
 
 .comment-container .media-body span.body img {
+    width: 100%;
+    max-width:500px;
+    max-height:600px;
     margin-top:10px;
     margin-bottom:10px;
+    display: block;
 }
