@@ -225,7 +225,7 @@
         let regexp_address = /(W[o|W][a-zA-Z0-9]{95})/g;
         let regexp_imgur = /(https:\/\/i.imgur.com\/[a-zA-Z0-9]{0,7}.[jpg|png|gif|webm]+)/g;
         let regexp_imgflip = /(https:\/\/i.imgflip.com\/[a-zA-Z0-9]{0,7}.[jpg|png|gif|webm]+)/g;
-        let truncated_addy = function(obj){ return `<span data-addy="${obj}" class="wow_addy">${obj.substring(0, 4)}...${obj.slice(-4)}</span>`; }
+        let truncated_addy = function(obj){ return `<span data-addy="${obj}" class="wow_addy">${obj.substring(0, 8)}...${obj.slice(-8)}</span>`; }
 
         function rich_addy(obj) {
             // richtext addy's
