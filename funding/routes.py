@@ -249,8 +249,7 @@ def donate():
     if not data:
         daemon = Daemon(url=settings.RPC_LOCATION_DEVFUND,
                         username=settings.RPC_USERNAME_DEVFUND,
-                        password=settings.RPC_PASSWORD_DEVFUND
-        )
+                        password=settings.RPC_PASSWORD_DEVFUND)
 
         txs_in = daemon.get_transfers_in_simple()
         if not txs_in['txs']:
@@ -263,7 +262,7 @@ def donate():
             tx['datetime'] = dateutil_parse(tx['datetime'])
         txs_in = data
 
-    return make_response(render_template('devfund.html', txs_in=txs_in))
+    return make_response(render_template('donate.html', txs_in=txs_in))
 
 
 @app.route('/register', methods=['GET', 'POST'])

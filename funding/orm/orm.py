@@ -380,6 +380,10 @@ class Comment(base):
     ix_comment_proposal_id = sa.Index("ix_comment_proposal_id", proposal_id)
 
     @property
+    def message_html(self):
+        return [line for line in self.message.strip().split('\r\n') if line]
+
+    @property
     def ago(self):
         from funding.bin.utils_time import TimeMagic
         return TimeMagic().ago(self.date_added)

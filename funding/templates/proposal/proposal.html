@@ -243,9 +243,6 @@
             // convert images to <img>
             let html = obj.html();
             let uid = obj.attr('data-id');
-            if(uid == 30){
-                debugger;
-            }
 
             var matches = html.match(regexp_imgur) || [];
             matches = matches.concat(html.match(regexp_imgflip));
@@ -253,7 +250,7 @@
                 matches.filter(function (value, index, self) {
                     return self.indexOf(value) === index && typeof value === 'string';
                 }).forEach(function (obj) {
-                    html = html.replace(new RegExp(obj, 'g'), `<br><img src="${obj}"/></a><br>`)
+                    html = html.replace(new RegExp(obj, 'g'), `<img src="${obj}"/></a>`)
                 });
             }
             obj.html(html);

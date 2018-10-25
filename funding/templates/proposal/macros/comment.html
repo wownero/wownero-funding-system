@@ -17,11 +17,21 @@
             <a href="/proposal/{{proposal.id}}#comment-{{c.id}}">
                 {{c.date_added.strftime('%Y-%m-%d %H:%M')}}
             </a>
-        </span><br>
-        <span data-id="{{c.id}}" class="body" style="{% if c.automated %}color:blue;{% endif %};word-break: break-all;">{{c.message}}</span>
-        <br>
+        </span>
+
+        <span data-id="{{c.id}}" class="body" style="{% if c.automated %}color:blue;{% endif %};">
+            {% for line in c.message_html %}
+                {{line}}
+                {% if loop.index != c.message_html|length %}
+                    <br>
+                {% endif %}
+            {% endfor %}
+        </span>
+
         {% if not c.automated %}
-        <a class="reply" href="{{url_for('propsal_comment_reply', cid=c.id, pid=proposal.id)}}">reply</a>
+        <a class="reply" href="{{url_for('propsal_comment_reply', cid=c.id, pid=proposal.id)}}">
+            <img style="margin-right:4px;" width="20px" height="20px" src="/static/reply.png"/>reply
+        </a>
         {% endif %}
 
         {% for _c in c.comments %}
@@ -45,9 +55,14 @@
                         {{_c.date_added.strftime('%Y-%m-%d %H:%M')}}
                     </a>
                 </span>
-                <br>
-                <span data-id="{{_c.id}}" class="body" style="word-break: break-all;">
-                {{_c.message}}
+
+                <span data-id="{{_c.id}}" class="body">
+                    {% for line in _c.message_html %}
+                        {{line}}
+                        {% if loop.index != _c.message_html|length %}
+                            <br>
+                        {% endif %}
+                    {% endfor %}
                 </span>
             </div>
         </div>

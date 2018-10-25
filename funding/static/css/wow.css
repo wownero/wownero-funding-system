@@ -432,7 +432,7 @@ span.username a{
 
 .comment-container a.reply{
     margin-bottom:2px;
-    font-family: Verdana, Geneva, sans-serif;
+    font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif;
     font-size: 11pt;
     text-decoration: underline;
     color: black;
@@ -652,4 +652,17 @@ ul.b {
 .container>.content h3,
 .container>.content h4{
     margin-bottom:20px;
+}
+
+
+.comment-container .media-body span.body {
+    word-wrap: break-word;
+    display: block;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.comment-container .media-body span.body img {
+    margin-top:10px;
+    margin-bottom:10px;
 }
