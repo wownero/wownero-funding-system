@@ -1,6 +1,8 @@
 from datetime import datetime
+
 from flask import request, redirect, Response, abort, render_template, url_for, flash, make_response, send_from_directory, jsonify
 from flask.ext.login import login_user , logout_user , current_user, login_required, current_user
+from dateutil.parser import parse as dateutil_parse
 from flask_yoloapi import endpoint, parameter
 
 import settings
@@ -234,6 +236,34 @@ def proposals(status, page, cat):
 
     return make_response(render_template('proposal/proposals.html',
                                          proposals=proposals, status=status, cat=cat))
+
+
+@app.route('/fund')
+def devfund():
+    from funding.bin.daemon import Daemon
+    from funding.factory import cache, db_session
+
+    data_default = {'sum': 0, 'txs': []}
+    cache_key = 'devfund_txs_in'
+    data = cache.get(cache_key)
+    if not data:
+        daemon = Daemon(url=settings.RPC_LOCATION_DEVFUND,
+                        username=settings.RPC_USERNAME_DEVFUND,
+                        password=settings.RPC_PASSWORD_DEVFUND
+        )
+
+        txs_in = daemon.get_transfers_in_simple()
+        if not txs_in['txs']:
+            cache.set(cache_key, data=data_default, expiry=60)
+        else:
+            txs_in['txs'] = txs_in['txs'][:50]  # truncate to last 50
+            cache.set(cache_key, data=txs_in, expiry=60)
+    else:
+        for tx in data['txs']:
+            tx['datetime'] = dateutil_parse(tx['datetime'])
+        txs_in = data
+
+    return make_response(render_template('devfund.html', txs_in=txs_in))
 
 
 @app.route('/register', methods=['GET', 'POST'])

@@ -1,12 +1,18 @@
-import settings
+from datetime import datetime
+
 import requests
 from requests.auth import HTTPDigestAuth
 
+import settings
 from funding.orm.orm import User
 
 
 class Daemon:
     def __init__(self, url=None, username=None, password=None):
+        self.url = url
+        self.username = username
+        self.password = password
+
         if url is None:
             self.url = settings.RPC_LOCATION
         if username is None:
@@ -86,14 +92,12 @@ class Daemon:
             return
 
     def get_transfers_in(self, proposal):
-        daemon = Daemon()
-
-        account = daemon.get_accounts(proposal.id)
+        account = self.get_accounts(proposal.id)
         if not account:
             raise Exception('wallet error; pid not found found')
         index = account['account_index']
 
-        address = daemon.get_address(index, proposal_id=proposal.id)
+        address = self.get_address(index, proposal_id=proposal.id)
         if not address:
             print('Could not fetch transfers_in for proposal id %d' % proposal.id)
             return {'sum': [], 'txs': []}
@@ -119,16 +123,38 @@ class Daemon:
             'sum': sum([float(z['amount'])/1e11 for z in txs]),
             'txs': txs
         }
-    
-    def get_transfers_out(self, proposal):
-        daemon = Daemon()
 
-        account = daemon.get_accounts(proposal.id)
+    def get_transfers_in_simple(self):
+        data = {
+            "method": "get_transfers",
+            "params": {"pool": True, "in": True},
+            "jsonrpc": "2.0",
+            "id": "0",
+        }
+
+        data = self._make_request(data)
+        data = data['result']
+        data = data.get('in', []) + data.get('pool', [])
+
+        for d in data:
+            d['datetime'] = datetime.fromtimestamp(d['timestamp'])
+            d['amount_human'] = float(d['amount'])/1e11
+
+        # most recent tx first
+        data = sorted(data, key=lambda k: k['datetime'], reverse=True)
+
+        return {
+            'sum': sum([float(z['amount'])/1e11 for z in data]),
+            'txs': data
+        }
+
+    def get_transfers_out(self, proposal):
+        account = self.get_accounts(proposal.id)
         if not account:
             raise Exception('wallet error; pid not found found')
         index = account['account_index']
 
-        address = daemon.get_address(index, proposal_id=proposal.id)
+        address = self.get_address(index, proposal_id=proposal.id)
         if not address:
             print('Could not fetch transfers_in for proposal id %d' % proposal.id)
             return {'sum': [], 'txs': []}
