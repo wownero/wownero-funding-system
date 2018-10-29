@@ -64,3 +64,24 @@ def api_qr_generate(address):
             raise Exception('Could not create QR code')
 
     return send_from_directory('static/qr', '%s.png' % address)
+
+
+@app.route('/api/1/wowlight')
+@endpoint.api(
+    parameter('version', type=str, location='args', required=True)
+)
+def api_wowlight_version_check(version):
+    """
+    Checks incoming wowlight wallet version, returns False when the version is
+    too old and needs to be upgraded (due to hard-forks)
+    :param version:
+    :return: bool
+    """
+    versions = {
+        '0.1.0': True
+    }
+
+    if version not in versions:
+        return False
+
+    return versions[version]
