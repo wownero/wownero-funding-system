@@ -9,8 +9,8 @@
     <br>
 
     <a target="_blank" href="https://explore.wownero.com/tx/{{tx['txid']}}">{{tx['txid'][:32]}}...</a>
-    <span class="amount{% if tx['type'] == 'in' %} in{% endif %}">
-        {% if tx['type'] == 'in' %}
+    <span class="amount{% if tx['type'] in ['pool', 'in'] %} in{% endif %}">
+        {% if tx['type'] in ['in', 'pool'] %}
             +
         {% else %}
             -
