@@ -81,6 +81,22 @@
                     link
                 </a>
             </div>
+
+            <div class="api_container" id="api_wow_supply">
+                <h5><small>GET</small> <code>/api/1/wow/supply</code></h5>
+                <hr>
+                <p>
+                    The current total supply of WOW.
+                </p>
+
+                <b>Example:</b>
+                <pre>curl -vvX GET 'https://funding.wownero.com/api/1/wow/supply'</pre>
+
+                <b>Response:</b>
+                <pre>{
+  "data": 10456897.573388882
+}</pre>
+            </div>
         </div>
 
         {% include 'sidebar.html' %}
