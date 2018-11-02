@@ -1,3 +1,4 @@
+import requests
 from flask import jsonify, send_from_directory, Response, request
 from flask_yoloapi import endpoint, parameter
 
@@ -85,3 +86,26 @@ def api_wowlight_version_check(version):
         return False
 
     return versions[version]
+
+
+@app.route('/api/1/wow/supply')
+@endpoint.api()
+def api_wow_supply():
+    from funding.factory import cache
+    cache_key = 'wow_supply'
+    hit = cache.get(cache_key)
+    if hit:
+        return float(hit.get('data', -1))
+
+    try:
+        resp = requests.get('http://explorer.wowne.ro/api/emission', headers={'User-Agent': 'WFS'})
+        resp.raise_for_status()
+        blob = resp.json()
+        assert 'data' in blob
+        assert 'coinbase' in blob['data']
+    except:
+        return Exception('error fetching circulating supply')
+
+    supply = blob['data'].get('coinbase') / 100000000000
+    cache.set(cache_key, {'data': supply}, 120)
+    return supply
