@@ -79,7 +79,9 @@ def api_wowlight_version_check(version):
     :return: bool
     """
     versions = {
-        '0.1.0': True
+        '0.1.0': False,
+        '0.1.1': False,
+        '0.1.2': True
     }
 
     if version not in versions:
