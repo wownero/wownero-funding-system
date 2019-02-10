@@ -1,44 +1,55 @@
 {% macro proposal_table(title, status, _proposals) %}
-    <table class="table table-proposal table-hover" data-status="{{ status }}" style="margin-bottom:6px;">
-        <thead>
-        <tr>
-            <th style="font-size: 18px;">{{title}}</th>
-            <th>Username</th>
-            <th id="date">Date</th>
-            {% if _proposals and _proposals[0].status >= 2 %}
-            <th style="text-align: right;">Funded</th>
-            {% else %}
-            <th></th>
-            {% endif %}
-            <th style="display: table-cell;text-align: center;">
-                <img width="24" src="/static/msg.png">
-            </th>
-        </tr>
-        </thead>
-        <tbody>
-            {% for p in _proposals %}
-            <tr>
-                <td class="id"><b><a href="/proposal/{{ p.id }}">{{ p.headline }}</a></b></td>
-                <td class="user"><a href="/user/{{ p.user.username }}">{{ p.user.username }}</a></td>
-                <td class="date"><small>{{ p.date_added.strftime('%Y-%m-%d %H:%M') }}</small></td>
-                <td class="funds">
-                    <span style="float:right;">
-                    {% if p.funds_progress >= 0.1 and p.status >= 2 %}
-                        {{p.funds_progress|int}}%
-                    {% else %}
-                    -
-                    {% endif %}
-                    </span>
-                </td>
-                <td style="text-align:center;">
-                    {% if p.comment_count %}
-                        {{p.comment_count}}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="wowtable" data-status="{{ status }}" style="{% if status == 4 %}opacity: 0.3;{% endif %}">
+      <div class="trow header">
+        <div class="item comments">
+          <img style="padding-top:2px;" width="24" src="/static/msg.png">
+        </div>
+        <div class="item small">
+          <span>Funded</span>
+        </div>
+        <div class="item small">
+          <span class="alignl">Date</span>
+        </div>
+        <div class="item small">
+          <span class="alignl">Username</span>
+        </div>
+        <div class="item big">
+          <span>{{title}}</span>
+        </div>
+      </div>
+      <div class="trow divider"></div>
+
+      {% for p in _proposals %}
+        <div class="trow body">
+          <div class="item comments">
+            <span>
+              {% if p.comment_count %}
+                  {{p.comment_count}}
+              {% else %}
+                  -
+              {% endif %}
+            </span>
+          </div>
+          <div class="item small">
+            <span>
+              {% if p.funds_progress >= 0.1 and p.status >= 2 %}
+                  {{p.funds_progress|int}}%
+              {% else %}
+              -
+              {% endif %}
+            </span>
+          </div>
+          <div class="item small">
+            <span class="alignl">{{ p.date_added.strftime('%Y-%m-%d') }}</span>
+          </div>
+          <div class="item small">
+            <span class="alignl"><a href="/user/{{ p.user.username }}">{{ p.user.username }}</a></span>
+          </div>
+          <div class="item big">
+            <a href="/proposal/{{ p.id }}">{{ p.headline }}</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
 {% endmacro %}

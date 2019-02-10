@@ -3,7 +3,7 @@
 {% endif %}
 
 <!-- Sidebar Widgets Column -->
-<div class="col-md-4 sidebar">
+<div class="col-md-3 sidebar">
 
     <!-- Search Widget -->
     <div class="card my-4" style="margin-top: 0 !important;">
@@ -17,6 +17,25 @@
                     </button>
                 </span>
             </div>
+        </div>
+    </div>
+
+    <!-- Side Widget -->
+    <div class="card my-4">
+        <h5 class="card-header">Recent comments</h5>
+        <div class="card-body">
+            <ul class="b">
+                {% for c in recent_comments %}
+                <a href="/proposal/{{c.proposal.id}}#comment-{{c.id}}">
+                <li>
+                    {{c.user.username}} in #{{c.proposal.id}}
+                    <small>
+                        ({{c.ago}})
+                    </small>
+                </li>
+                </a>
+                {% endfor %}
+            </li>
         </div>
     </div>
 
@@ -49,25 +68,6 @@
                     </ul>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Side Widget -->
-    <div class="card my-4">
-        <h5 class="card-header">Recent comments</h5>
-        <div class="card-body">
-            <ul class="b">
-                {% for c in recent_comments %}
-                <a href="/proposal/{{c.proposal.id}}#comment-{{c.id}}">
-                <li>
-                    {{c.user.username}} in #{{c.proposal.id}}
-                    <small>
-                        ({{c.ago}})
-                    </small>
-                </li>
-                </a>
-                {% endfor %}
-            </li>
         </div>
     </div>
 

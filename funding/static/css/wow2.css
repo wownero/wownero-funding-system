@@ -24,9 +24,8 @@ body {
 
 .navbar .navbar-brand img#text{
     width:235px;
-    height:13px;
-    margin-top: 0px;
-    margin-left:8px;
+    margin-top: -4px;
+    padding-top: 0px;
     display: inline-block;
 }
 
@@ -121,6 +120,10 @@ body {
 .navbar-dark .navbar-brand {
     color: #fff;
     font-size: 18pt;
+    margin-top: 0;
+    padding-top: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
     text-shadow: 2px 2px #667ff952;
     font-family: "Comic Sans MS", "Comic Sans", cursive;
 }
@@ -296,6 +299,13 @@ border: 1px solid #008926 !important;
 
 .navbar-dark .navbar-nav .nav-link {
     color: white;
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+    font-size: 15px;
+}
+
+.navbar-nav .nav-item {
+    line-height: 20px;
 }
 
 nav .nav-link{
@@ -309,7 +319,6 @@ nav .nav-link .active{
 .proposal-info-table td{
     border-top: 0;
 }
-
 
 .proposal-info-table td span.badge{
     font-size:20px;
@@ -508,9 +517,18 @@ ul.b {
 }
 
 .sidebar .card-body{
-    padding: 1.0rem;
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
+    padding-top: 1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    font-size: 14px;
+}
+
+.sidebar .card-body ul.b{
+    margin-bottom:0;
+}
+
+.card-header {
+    border-radius: 10px 0 0 !important;
 }
 
 /* cyrillic-ext */
@@ -662,4 +680,96 @@ ul.b {
     margin-top:10px;
     margin-bottom:10px;
     display: block;
+}
+
+.navbar-brand {
+    margin-top:0
+    margin-bottom:0
+    padding-top:0
+    padding-bottom:0;
+}
+
+.card h5{
+    color: #0000009e;
+    font-size: 14px;
+}
+
+.wowtable{
+    width:100%;
+    display: block;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace
+}
+.wowtable .trow{
+    width: 100%;
+    height: 34px;
+    display: table;
+}
+.wowtable .trow .item{
+    float:right;
+    width:100px;
+}
+.wowtable .trow .item.one{
+    width:30%;
+    min-width: 200px;
+}
+.wowtable .trow .item.small{
+    max-width:100px;
+    text-align:right;
+}
+.wowtable .trow.header .item span {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    padding-top:6px;
+    display: block;
+}
+.wowtable .trow .item.comments{
+    max-width:70px;
+    text-align: center;
+}
+.wowtable .trow .item.big{
+    display: inline-block;
+    text-align: left;
+    float: left;
+    width: auto;
+    max-width: 50%;
+}
+.wowtable .trow.header .item.big span{
+    padding-left:7px;
+    padding-top:3px;
+    font-size:18px;
+    word-break: break-word;
+}
+.trow.divider{
+    height:1px;
+    background: #00000029 !important;
+}
+.wowtable .trow.body .item span {
+    font-size:14px;
+    padding-top:6px;
+    display: block;
+}
+.wowtable .trow.body .item.big a {
+    display: block;
+    padding-left: 7px;
+    color: #006400;
+    padding-top: 6px;
+    font-size: 15px;
+    font-weight: 700;
+    word-break: break-word;
+}
+.wowtable .trow span.alignl{
+    text-align:left;
+    padding-left:7px;
+}
+
+
+@media (max-width: 990px) {
+
+.wowtable .small{
+    display:none
+}
+.wowtable .trow .item.big{
+    max-width: 88%;
+}
 }

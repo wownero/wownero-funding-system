@@ -5,7 +5,13 @@
     </span>
 
     <span class="height">
-        <b>Blockheight</b>: {{tx['height']}}</span>
+        <b>Blockheight</b>:
+      {% if tx['type'] == 'pool' %}
+        soon^tm
+      {% else %}
+      {{tx['height']}}
+      {% endif %}
+    </span>
     <br>
 
     <a target="_blank" href="https://explore.wownero.com/tx/{{tx['txid']}}">{{tx['txid'][:32]}}...</a>
