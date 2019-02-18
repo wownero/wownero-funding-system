@@ -93,6 +93,9 @@ class Daemon:
 
     def get_transfers_in(self, proposal):
         account = self.get_accounts(proposal.id)
+        if not account and proposal.addr_donation:
+            account = self.create_account(proposal.id)
+            account = self.get_accounts(proposal.id)
         if not account:
             raise Exception('wallet error; pid not found found')
         index = account['account_index']
