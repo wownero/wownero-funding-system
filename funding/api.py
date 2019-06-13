@@ -81,7 +81,8 @@ def api_wowlight_version_check(version):
     versions = {
         '0.1.0': False,
         '0.1.1': False,
-        '0.1.2': True
+        '0.1.2': False,
+        '0.1.3': True
     }
 
     if version not in versions:
