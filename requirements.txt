@@ -1,4 +1,4 @@
-sqlalchemy==1.2.7
+sqlalchemy==1.3.4
 flask==0.12.3
 flask-yoloapi==0.1.5
 flask_session
