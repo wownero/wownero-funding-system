@@ -11,7 +11,7 @@ from sqlalchemy.types import Float
 from sqlalchemy_json import MutableJson
 
 import settings
-from funding.factory import db
+from funding.factory import db, cache
 
 base = declarative_base(name="Model")
 
@@ -191,6 +191,7 @@ class Proposal(db.Model):
         return {"amount": amount, "pct": pct}
 
     @property
+    @cache.cached(timeout=60, key_prefix="fetch_prices")
     def balance(self):
         """This property retrieves the current funding status
         of this proposal. It uses Redis cache to not spam the

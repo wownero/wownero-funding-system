@@ -19,7 +19,7 @@ def json_encoder(obj):
 
 class Summary:
     @staticmethod
-    @cache.cached(timeout=300, key_prefix="fetch_prices")
+    @cache.cached(timeout=600, key_prefix="fetch_prices")
     def fetch_prices():
         return {
             'coin-btc': coin_btc_value(),
@@ -27,7 +27,7 @@ class Summary:
         }
 
     @staticmethod
-    @cache.cached(timeout=300, key_prefix="funding_stats")
+    @cache.cached(timeout=600, key_prefix="funding_stats")
     def fetch_stats():
         from funding.factory import db
         from funding.orm.orm import Proposal, User, Comment

@@ -4,6 +4,7 @@ from flask import Flask
 from flask_caching import Cache
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.middleware.proxy_fix import ProxyFix
 import redis
 
 app = None
@@ -68,6 +69,8 @@ def create_app():
     app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 30
     app.secret_key = settings.SECRET
+
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
     _setup_cache(app)
     _setup_session(app)
