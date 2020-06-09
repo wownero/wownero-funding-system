@@ -22,6 +22,10 @@ SESSION_PREFIX = os.environ.get('{coincode}_SESSION_PREFIX', 'session:').format(
 REDIS_HOST = os.environ.get('REDIS_HOST', '127.0.0.1')
 REDIS_PORT = int(os.environ.get('REDIS_PORT', 6379))
 REDIS_PASSWD = os.environ.get('REDIS_PASSWD', None)
+REDIS_URI = "redis://"
+if REDIS_PASSWD:
+    REDIS_URI += f":{REDIS_PASSWD}"
+REDIS_URI += f"@{REDIS_HOST}:{REDIS_PORT}"
 
 BIND_HOST = os.environ.get("BIND_HOST", "0.0.0.0")
 if not BIND_HOST:

@@ -4,6 +4,7 @@ from flask import Flask
 from flask_caching import Cache
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
+import redis
 
 app = None
 cache = None
@@ -17,8 +18,12 @@ def _setup_cache(app: Flask):
     cache_config = {
         "CACHE_TYPE": "redis",
         "CACHE_DEFAULT_TIMEOUT": 60,
-        "CACHE_KEY_PREFIX": "wow_cache_"
+        "CACHE_KEY_PREFIX": "wow_cache_",
+        "CACHE_REDIS_PORT": settings.REDIS_PORT
     }
+
+    if settings.REDIS_PASSWD:
+        cache_config["CACHE_REDIS_PASSWORD"] = settings.REDIS_PASSWD
 
     app.config.from_mapping(cache_config)
     cache = Cache(app)
@@ -27,6 +32,7 @@ def _setup_cache(app: Flask):
 def _setup_session(app: Flask):
     app.config['SESSION_TYPE'] = 'redis'
     app.config['SESSION_COOKIE_NAME'] = 'bar'
+    app.config['SESSION_REDIS'] = redis.from_url(settings.REDIS_URI)
     Session(app)  # defaults to timedelta(days=31)
 
 
