@@ -1,19 +1,29 @@
 from datetime import datetime
+import string
+import random
+
+import requests
+from sqlalchemy.orm import relationship, backref
 import sqlalchemy as sa
 from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.types import Float
+from sqlalchemy_json import MutableJson
+
 import settings
+from funding.factory import db
 
 base = declarative_base(name="Model")
 
-class User(base):
+
+class User(db.Model):
     __tablename__ = "users"
-    id = sa.Column('user_id', sa.Integer, primary_key=True)
-    username = sa.Column(sa.String(20), unique=True, index=True)
-    password = sa.Column(sa.String(60))
-    email = sa.Column(sa.String(50), unique=True, index=True)
-    registered_on = sa.Column(sa.DateTime)
-    admin = sa.Column(sa.Boolean, default=False)
+    id = db.Column('user_id', db.Integer, primary_key=True)
+    username = db.Column(db.String(20), unique=True, index=True)
+    password = db.Column(db.String(60))
+    email = db.Column(db.String(50), unique=True, index=True)
+    registered_on = db.Column(db.DateTime)
+    admin = db.Column(db.Boolean, default=False)
     proposals = relationship('Proposal', back_populates="user")
     comments = relationship("Comment", back_populates="user")
 
@@ -48,7 +58,7 @@ class User(base):
 
     @classmethod
     def add(cls, username, password, email):
-        from funding.factory import db_session
+        from funding.factory import db
         from funding.validation import val_username, val_email
 
         try:
@@ -57,37 +67,39 @@ class User(base):
             val_email(email)
 
             user = User(username, password, email)
-            db_session.add(user)
-            db_session.commit()
-            db_session.flush()
+            db.session.add(user)
+            db.session.commit()
+            db.session.flush()
             return user
         except Exception as ex:
-            db_session.rollback()
+            db.session.rollback()
             raise
 
 
-class Proposal(base):
+class Proposal(db.Model):
     __tablename__ = "proposals"
-    id = sa.Column(sa.Integer, primary_key=True)
-    headline = sa.Column(sa.VARCHAR, nullable=False)
-    content = sa.Column(sa.VARCHAR, nullable=False)
-    category = sa.Column(sa.VARCHAR, nullable=False)
-    date_added = sa.Column(sa.TIMESTAMP, default=datetime.now)
-    html = sa.Column(sa.VARCHAR)
-    last_edited = sa.Column(sa.TIMESTAMP)
+    id = db.Column(db.Integer, primary_key=True)
+    archived = db.Column(db.Boolean, default=False)
+    headline = db.Column(db.VARCHAR, nullable=False)
+    content = db.Column(db.VARCHAR, nullable=False)
+    category = db.Column(db.VARCHAR, nullable=False)
+    date_added = db.Column(db.TIMESTAMP, default=datetime.now)
+    html = db.Column(db.VARCHAR)
+    last_edited = db.Column(db.TIMESTAMP)
 
     # the FFS target
-    funds_target = sa.Column(sa.Float, nullable=False)
+    funds_target = db.Column(db.Float, nullable=False)
 
     # the FFS progress (cached)
-    funds_progress = sa.Column(sa.Float, nullable=False, default=0)
+    funds_progress = db.Column(db.Float, nullable=False, default=0)
 
     # the FFS withdrawal amount (paid to the author)
-    funds_withdrew = sa.Column(sa.Float, nullable=False, default=0)
+    funds_withdrew = db.Column(db.Float, nullable=False, default=0)
 
     # the FFS receiving and withdrawal addresses
-    addr_donation = sa.Column(sa.VARCHAR)
-    addr_receiving = sa.Column(sa.VARCHAR)
+    addr_donation = db.Column(db.VARCHAR)
+    addr_receiving = db.Column(db.VARCHAR)
+    payment_id = db.Column(db.VARCHAR)
 
     # proposal status:
     # 0: disabled
@@ -95,9 +107,9 @@ class Proposal(base):
     # 2: funding required
     # 3: wip
     # 4: completed
-    status = sa.Column(sa.INTEGER, default=1)
+    status = db.Column(db.INTEGER, default=1)
 
-    user_id = sa.Column(sa.Integer, sa.ForeignKey('users.user_id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
     user = relationship("User", back_populates="proposals")
 
     payouts = relationship("Payout", back_populates="proposal")
@@ -131,17 +143,12 @@ class Proposal(base):
 
     @classmethod
     def find_by_id(cls, pid: int):
-        from funding.factory import db_session
+        from funding.factory import db
         q = cls.query
         q = q.filter(Proposal.id == pid)
         result = q.first()
         if not result:
             return
-
-        # check if we have a valid addr_donation generated. if not, make one.
-        if not result.addr_donation and result.status == 2:
-            from funding.bin.daemon import Daemon
-            Proposal.generate_donation_addr(result)
         return result
 
     @property
@@ -154,21 +161,21 @@ class Proposal(base):
 
     @property
     def comment_count(self):
-        from funding.factory import db_session
-        q = db_session.query(sa.func.count(Comment.id))
+        from funding.factory import db
+        q = db.session.query(db.func.count(Comment.id))
         q = q.filter(Comment.proposal_id == self.id)
         return q.scalar()
 
     def get_comments(self):
-        from funding.factory import db_session
-        q = db_session.query(Comment)
+        from funding.factory import db
+        q = db.session.query(Comment)
         q = q.filter(Comment.proposal_id == self.id)
-        q = q.filter(Comment.replied_to == None)
+        q = q.filter(Comment.replied_to.is_(None))
         q = q.order_by(Comment.date_added.desc())
         comments = q.all()
 
         for c in comments:
-            q = db_session.query(Comment)
+            q = db.session.query(Comment)
             q = q.filter(Comment.proposal_id == self.id)
             q = q.filter(Comment.replied_to == c.id)
             _c = q.all()
@@ -178,34 +185,61 @@ class Proposal(base):
         return self
 
     @property
+    def spends(self):
+        amount = sum([p.amount for p in self.payouts])
+        pct = amount / 100 * self.balance['sum']
+        return {"amount": amount, "pct": pct}
+
+    @property
     def balance(self):
         """This property retrieves the current funding status
         of this proposal. It uses Redis cache to not spam the
         daemon too much. Returns a nice dictionary containing
         all relevant proposal funding info"""
         from funding.bin.utils import Summary, coin_to_usd
-        from funding.factory import cache, db_session
-        rtn = {'sum': 0.0, 'txs': [], 'pct': 0.0}
+        from funding.factory import cache, db
+        rtn = {'sum': 0.0, 'txs': [], 'pct': 0.0, 'available': 0}
 
-        cache_key = 'coin_balance_pid_%d' % self.id
-        data = cache.get(cache_key)
-        if not data:
-            from funding.bin.daemon import Daemon
-            try:
-                data = Daemon().get_transfers_in(proposal=self)
-                if not isinstance(data, dict):
-                    print('error; get_transfers_in; %d' % self.id)
-                    return rtn
-                cache.set(cache_key, data=data, expiry=60)
-            except Exception as ex:
-                print('error; get_transfers_in; %d' % self.id)
-                return rtn
+        if self.archived:
+            return rtn
+
+        try:
+            r = requests.get(f'http://{settings.RPC_HOST}:{settings.RPC_PORT}/json_rpc', json={
+                "jsonrpc": "2.0",
+                "id": "0",
+                "method": "get_payments",
+                "params": {
+                    "payment_id": self.payment_id
+                }
+            })
+            r.raise_for_status()
+            blob = r.json()
+
+            assert 'result' in blob
+            assert 'payments' in blob['result']
+            assert isinstance(blob['result']['payments'], list)
+        except Exception as ex:
+            return rtn
+
+        txs = blob['result']['payments']
+        for tx in txs:
+            tx['amount_human'] = float(tx['amount'])/1e11
+            tx['txid'] = tx['tx_hash']
+            tx['type'] = 'in'
+
+        data = {
+            'sum': sum([float(z['amount']) / 1e11 for z in txs]),
+            'txs': txs
+        }
+
+        if not isinstance(data, dict):
+            print('error; get_transfers_in; %d' % self.id)
+            return rtn
 
         prices = Summary.fetch_prices()
         for tx in data['txs']:
             if prices:
                 tx['amount_usd'] = coin_to_usd(amt=tx['amount_human'], btc_per_coin=prices['coin-btc'], usd_per_btc=prices['btc-usd'])
-            tx['datetime'] = datetime.fromtimestamp(tx['timestamp'])
 
         if data.get('sum', 0.0):
             data['pct'] = 100 / float(self.funds_target / data.get('sum', 0.0))
@@ -216,8 +250,8 @@ class Proposal(base):
 
         if data['pct'] != self.funds_progress:
             self.funds_progress = data['pct']
-            db_session.commit()
-            db_session.flush()
+            db.session.commit()
+            db.session.flush()
 
         if data['available']:
             data['remaining_pct'] = 100 / float(data['sum'] / data['available'])
@@ -226,74 +260,9 @@ class Proposal(base):
 
         return data
 
-    @property
-    def spends(self):
-        from funding.bin.utils import Summary, coin_to_usd
-        from funding.factory import cache, db_session
-        rtn = {'sum': 0.0, 'txs': [], 'pct': 0.0}
-
-        cache_key = 'coin_spends_pid_%d' % self.id
-        data = cache.get(cache_key)
-        if not data:
-            from funding.bin.daemon import Daemon
-            try:
-                data = Daemon().get_transfers_out(proposal=self)
-                if not isinstance(data, dict):
-                    print('error; get_transfers_out; %d' % self.id)
-                    return rtn
-                cache.set(cache_key, data=data, expiry=60)
-            except:
-                print('error; get_transfers_out; %d' % self.id)
-                return rtn
-
-        data['remaining_pct'] = 0.0
-        prices = Summary.fetch_prices()
-
-        for tx in data['txs']:
-            if prices:
-                tx['amount_usd'] = coin_to_usd(amt=tx['amount_human'], btc_per_coin=prices['coin-btc'], usd_per_btc=prices['btc-usd'])
-            tx['datetime'] = datetime.fromtimestamp(tx['timestamp'])
-
-        if data.get('sum', 0.0):
-            data['pct'] = 100 / float(self.funds_target / data.get('sum', 0.0))
-            data['spent'] = data['sum']
-        else:
-            data['pct'] = 0.0
-            data['spent'] = 0.0
-
-        cache_key_in = 'coin_balance_pid_%d' % self.id
-        data_in = cache.get(cache_key_in)
-        if data_in and data['spent']:
-            data['remaining_pct'] = 100 / float(data_in['sum'] / data['spent'])
-
-        return data
-
-    @staticmethod
-    def generate_donation_addr(cls):
-        from funding.factory import db_session
-        from funding.bin.daemon import Daemon
-        if cls.addr_donation:
-            return cls.addr_donation
-
-        # check if the current user has an account in the wallet
-        account = Daemon().get_accounts(cls.id)
-        if not account:
-            account = Daemon().create_account(cls.id)
-        index = account['account_index']
-
-        address = account.get('address') or account.get('base_address')
-        if not address:
-            raise Exception('Cannot generate account/address for pid %d' % cls.id)
-
-        # assign donation address, commit to db
-        cls.addr_donation = address
-        db_session.commit()
-        db_session.flush()
-        return address
-
     @classmethod
     def find_by_args(cls, status: int = None, cat: str = None, limit: int = 20, offset=0):
-        from funding.factory import db_session
+        from funding.factory import db
         if isinstance(status, int) and status not in settings.FUNDING_STATUSES.keys():
             raise NotImplementedError('invalid status')
         if isinstance(cat, str) and cat not in settings.FUNDING_CATEGORIES:
@@ -313,71 +282,82 @@ class Proposal(base):
 
     @classmethod
     def search(cls, key: str):
-        key_ilike = '%' + key.replace('%', '') + '%'
+        key_ilike = f"%{key.replace('%', '')}%"
         q = Proposal.query
-        q = q.filter(sa.or_(
+        q = q.filter(db.or_(
             Proposal.headline.ilike(key_ilike),
             Proposal.content.ilike(key_ilike)))
         return q.all()
 
 
-class Payout(base):
+class Payout(db.Model):
     __tablename__ = "payouts"
-    id = sa.Column(sa.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
 
-    proposal_id = sa.Column(sa.Integer, sa.ForeignKey('proposals.id'))
+    proposal_id = db.Column(db.Integer, db.ForeignKey('proposals.id'))
     proposal = relationship("Proposal", back_populates="payouts")
 
-    amount = sa.Column(sa.Integer, nullable=False)
-    to_address = sa.Column(sa.VARCHAR, nullable=False)
+    amount = db.Column(db.Integer, nullable=False)
+    to_address = db.Column(db.VARCHAR, nullable=False)
 
-    ix_proposal_id = sa.Index("ix_proposal_id", proposal_id)
+    date_sent = db.Column(db.TIMESTAMP, default=datetime.now)
+
+    ix_proposal_id = db.Index("ix_proposal_id", proposal_id)
 
     @classmethod
     def add(cls, proposal_id, amount, to_address):
         # @TODO: validate that we can make this payout; check previous payouts
-        from flask.ext.login import current_user
+        from flask_login import current_user
         if not current_user.admin:
             raise Exception("user must be admin to add a payout")
-        from funding.factory import db_session
+        from funding.factory import db
 
         try:
             payout = Payout(propsal_id=proposal_id, amount=amount, to_address=to_address)
-            db_session.add(payout)
-            db_session.commit()
-            db_session.flush()
+            db.session.add(payout)
+            db.session.commit()
+            db.session.flush()
             return payout
         except Exception as ex:
-            db_session.rollback()
+            db.session.rollback()
             raise
 
     @staticmethod
     def get_payouts(proposal_id):
-        from funding.factory import db_session
-        return db_session.query(Payout).filter(Payout.proposal_id == proposal_id).all()
+        from funding.factory import db
+        return db.session.query(Payout).filter(Payout.proposal_id == proposal_id).all()
+
+    @property
+    def as_tx(self):
+        return {
+            "block_height": "-",
+            "type": "out",
+            "amount_human": self.amount,
+            "amount": self.amount
+        }
 
 
-class Comment(base):
+class Comment(db.Model):
     __tablename__ = "comments"
-    id = sa.Column(sa.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
 
-    proposal_id = sa.Column(sa.Integer, sa.ForeignKey('proposals.id'))
+    proposal_id = db.Column(db.Integer, db.ForeignKey('proposals.id'))
     proposal = relationship("Proposal", back_populates="comments")
 
-    user_id = sa.Column(sa.Integer, sa.ForeignKey('users.user_id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     user = relationship("User", back_populates="comments")
 
-    date_added = sa.Column(sa.TIMESTAMP, default=datetime.now)
+    date_added = db.Column(db.TIMESTAMP, default=datetime.now)
 
-    message = sa.Column(sa.VARCHAR, nullable=False)
-    replied_to = sa.Column(sa.ForeignKey("comments.id"))
+    message = db.Column(db.VARCHAR, nullable=False)
+    replied_to = db.Column(db.ForeignKey("comments.id"))
 
-    locked = sa.Column(sa.Boolean, default=False)
+    locked = db.Column(db.Boolean, default=False)
 
-    automated = sa.Column(sa.Boolean, default=False)
+    automated = db.Column(db.Boolean, default=False)
 
-    ix_comment_replied_to = sa.Index("ix_comment_replied_to", replied_to)
-    ix_comment_proposal_id = sa.Index("ix_comment_proposal_id", proposal_id)
+    ix_comment_replied_to = db.Index("ix_comment_replied_to", replied_to)
+    ix_comment_proposal_id = db.Index("ix_comment_proposal_id", proposal_id)
 
     @property
     def message_html(self):
@@ -390,28 +370,30 @@ class Comment(base):
 
     @staticmethod
     def find_by_id(cid: int):
-        from funding.factory import db_session
-        return db_session.query(Comment).filter(Comment.id == cid).first()
+        from funding.factory import db
+        return db.session.query(Comment).filter(Comment.id == cid).first()
 
     @staticmethod
     def remove(cid: int):
-        from funding.factory import db_session
-        from flask.ext.login import current_user
-        if current_user.id != user_id and not current_user.admin:
-            raise Exception("no rights to remove this comment")
+        from funding.factory import db
+        from flask_login import current_user
         comment = Comment.get(cid=cid)
+
+        if current_user.id != comment.user_id and not current_user.admin:
+            raise Exception("no rights to remove this comment")
+
         try:
             comment.delete()
-            db_session.commit()
-            db_session.flush()
+            db.session.commit()
+            db.session.flush()
         except:
-            db_session.rollback()
+            db.session.rollback()
             raise
 
     @staticmethod
     def lock(cid: int):
-        from funding.factory import db_session
-        from flask.ext.login import current_user
+        from funding.factory import db
+        from flask_login import current_user
         if not current_user.admin:
             raise Exception("admin required")
         comment = Comment.find_by_id(cid=cid)
@@ -419,17 +401,17 @@ class Comment(base):
             raise Exception("comment by that id not found")
         comment.locked = True
         try:
-            db_session.commit()
-            db_session.flush()
+            db.session.commit()
+            db.session.flush()
             return comment
         except:
-            db_session.rollback()
+            db.session.rollback()
             raise
 
     @classmethod
     def add_comment(cls, pid: int, user_id: int, message: str, cid: int = None, message_id: int = None, automated=False):
-        from flask.ext.login import current_user
-        from funding.factory import db_session
+        from flask_login import current_user
+        from funding.factory import db
         if not message:
             raise Exception("empty message")
 
@@ -448,7 +430,7 @@ class Comment(base):
                 comment.replied_to = parent.id
         else:
             try:
-                user = db_session.query(User).filter(User.id == user_id).first()
+                user = db.session.query(User).filter(User.id == user_id).first()
                 if not user:
                     raise Exception("no user by that id")
                 comment = next(c for c in user.comments if c.id == message_id)
@@ -460,10 +442,10 @@ class Comment(base):
                 raise Exception("unknown error")
         try:
             comment.message = message
-            db_session.add(comment)
-            db_session.commit()
-            db_session.flush()
+            db.session.add(comment)
+            db.session.commit()
+            db.session.flush()
         except Exception as ex:
-            db_session.rollback()
+            db.session.rollback()
             raise Exception(str(ex))
         return comment

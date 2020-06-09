@@ -2,16 +2,16 @@ from datetime import datetime
 from flask import session, g, request
 import settings
 from funding.bin.utils import Summary
-from funding.factory import app, db_session
+from funding.factory import app, db
 from funding.orm.orm import Proposal, User, Comment
 
 
 @app.context_processor
 def templating():
-    from flask.ext.login import current_user
-    recent_comments = db_session.query(Comment).filter(Comment.automated == False).order_by(Comment.date_added.desc()).limit(8).all()
+    from flask_login import current_user
+    recent_comments = db.session.query(Comment).filter(Comment.automated == False).order_by(Comment.date_added.desc()).limit(8).all()
     summary_data = Summary.fetch_stats()
-    newest_users = db_session.query(User).filter(User.admin == False).order_by(User.registered_on.desc()).limit(5).all()
+    newest_users = db.session.query(User).filter(User.admin == False).order_by(User.registered_on.desc()).limit(5).all()
     return dict(logged_in=current_user.is_authenticated,
                 current_user=current_user,
                 funding_categories=settings.FUNDING_CATEGORIES,
@@ -28,8 +28,6 @@ def before_request():
 
 @app.after_request
 def after_request(res):
-    if hasattr(g, 'funding_prices'):
-        delattr(g, 'funding_prices')
     res.headers.add('Accept-Ranges', 'bytes')
 
     if request.full_path.startswith('/api/'):
@@ -45,7 +43,7 @@ def after_request(res):
 
 @app.teardown_appcontext
 def shutdown_session(**kwargs):
-    db_session.remove()
+    db.session.remove()
 
 
 @app.errorhandler(404)

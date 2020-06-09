@@ -5,7 +5,7 @@ from flask_yoloapi import endpoint, parameter
 import settings
 from funding.bin.utils import get_ip
 from funding.bin.qr import QrCodeGenerator
-from funding.factory import app, db_session
+from funding.factory import app, db
 from funding.orm.orm import Proposal, User
 
 

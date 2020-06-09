@@ -34,8 +34,8 @@ class QrCodeGenerator:
         :param color_to:  gradient to color
         :return:
         """
-        if len(address) != settings.COIN_ADDRESS_LENGTH:
-            raise Exception('faulty address length')
+        if len(address) not in settings.COIN_ADDRESS_LENGTH:
+            raise Exception(f'faulty address length, should be: {" or ".join(map(str, settings.COIN_ADDRESS_LENGTH))}')
 
         if not dest:
             dest = os.path.join(self.base, '%s.png' % address)

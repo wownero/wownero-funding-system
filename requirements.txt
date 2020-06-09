@@ -1,5 +1,5 @@
 sqlalchemy==1.3.4
-flask==0.12.3
+flask
 flask-yoloapi==0.1.5
 flask_session
 flask-login
@@ -12,3 +12,6 @@ requests
 pyqrcode
 pypng
 pillow-simd
+Flask-Caching
+flask-sqlalchemy
+sqlalchemy_json

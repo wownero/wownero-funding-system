@@ -650,10 +650,6 @@ ul.b {
     color: #999;
 }
 
-.tx_item .height {
-    float:right
-}
-
 .tx_item .height b {
     font-size:14px;
 }

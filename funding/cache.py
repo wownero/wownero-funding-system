@@ -45,17 +45,3 @@ class JsonRedis(RedisSessionInterface):
             redis=redis.Redis(**redis_args()),
             key_prefix=key_prefix,
             use_signer=use_signer)
-
-
-class WowCache:
-    def __init__(self):
-        self._cache = redis.StrictRedis(**redis_args())
-
-    def get(self, key):
-        try:
-            return json.loads(self._cache.get(key))
-        except:
-            return {}
-
-    def set(self, key: str, data: dict, expiry=300):
-        self._cache.set(key, json.dumps(data, default=json_encoder), ex=expiry)

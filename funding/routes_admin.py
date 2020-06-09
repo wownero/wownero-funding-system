@@ -1,5 +1,5 @@
-from flask.ext.login import login_required
-from wowfunding.factory import app, db_session
+from flask_login import login_required
+from funding.factory import app, db
 
 
 @app.route('/admin/index')

@@ -1,20 +1,28 @@
 {% macro tx_item(tx) %}
 <li class="list-group-item tx_item">
-    <span class="datetime">
-        {{tx['datetime'].strftime('%Y-%m-%d %H:%M')}}
-    </span>
-
     <span class="height">
         <b>Blockheight</b>:
-      {% if tx['type'] == 'pool' %}
-        soon^tm
-      {% else %}
-      {{tx['height']}}
-      {% endif %}
+        {% if tx['type'] == 'pool' %}
+          soon^tm
+        {% elif tx['type'] == 'out' %}
+          <small>hidden</small>
+        {% else %}
+        {{tx['block_height']}}
+        {% endif %}
     </span>
     <br>
 
+    {% if tx['type'] in ['in', 'pool'] %}
     <a target="_blank" href="https://explore.wownero.com/tx/{{tx['txid']}}">{{tx['txid'][:32]}}...</a>
+    {% else %}
+      {% set lulz = [
+        'vodka', 'hookers', 'booze', 'strippers', 'new lambo',
+        'new ferrari', 'new villa', 'new vacation home', 'new tesla',
+        'new watch', 'new home cinema set', 'throphy wife', 'drugs']
+      %}
+      <a style="font-size:11px;" href="#">Sent to author. Enjoy the {{ lulz|random }}!</a>
+    {% endif %}
+
     <span class="amount{% if tx['type'] in ['pool', 'in'] %} in{% endif %}">
         {% if tx['type'] in ['in', 'pool'] %}
             +

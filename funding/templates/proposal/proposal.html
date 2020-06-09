@@ -97,11 +97,13 @@
                                     {{proposal.balance['available']|round(3) or 0 }} WOW Raised
                                     {% set remaining = proposal.funds_target - proposal.balance['available']|float|round(3) %}
 
+                                    <small>
                                     {% if remaining > 0 %}
                                         ({{ (proposal.funds_target - proposal.balance['available']|float|round(3)|int) }} WOW until goal)
                                     {% elif remaining < 0 %}
                                         ({{ (proposal.balance['available']-proposal.funds_target|float|round(3)|int) }} WOW past goal!)
                                     {% endif %}
+                                    </small>
 
                                     <div class="progress">
                                         <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.balance['pct']}}%;">
@@ -113,15 +115,16 @@
 
                                 <br/>
                                 <div class="col-lg-8">
-                                    {{proposal.spends['spent']|round(3) or 0}} WOW Paid out
+                                    {{ proposal.spends['amount'] }} WOW Paid out <small>({{ proposal.spends['pct']|round(1) }}%)</small>
                                     <div class="progress">
-                                        <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.spends['remaining_pct']}}%;">
+                                        <!-- @todo: spends remaining pct -->
+                                        <div class="progress-bar progress-warning progress-bar" style="width: {{ proposal.spends['pct'] }}%;">
                                         </div>
                                     </div>
                                     <hr>
                                 </div>
                                 <div class="col-lg-8">
-                                    {{(proposal.balance['available']-proposal.spends['spent']) |round(3) or 0}} WOW Available to Payout
+                                    {{ (proposal.balance['available']-proposal.spends['amount']) |round(3) or 0}} WOW Available for payout :-)
                                     <div class="progress">
                                         <div class="progress-bar progress-warning progress-bar" style="width: {{proposal.balance['remaining_pct']}}%;">
                                         </div>
@@ -185,15 +188,15 @@
     <!-- /.row -->
     {% endif %}
 
-    {% if proposal.spends['txs'] %}
+    {% if proposal.payouts %}
         <div class="row">
             <div class="col-md-12">
                 <div class="card my-6" id="incoming_txs">
-                    <h5 class="card-header">Outgoing transactions <small>({{proposal.spends['txs']|length}})</small></h5>
+                    <h5 class="card-header">Outgoing transactions</h5>
                     <div class="card-body">
                         <ul class="list-group">
-                            {% for tx in proposal.spends['txs'] %}
-                                {{ tx_item(tx) }}
+                            {% for payout in proposal.payouts %}
+                                {{ tx_item(payout.as_tx) }}
                             {% endfor %}
                         </ul>
                     </div>

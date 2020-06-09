@@ -1,12 +1,14 @@
 from datetime import datetime
 
+import requests
 from flask import request, redirect, Response, abort, render_template, url_for, flash, make_response, send_from_directory, jsonify
-from flask.ext.login import login_user , logout_user , current_user, login_required, current_user
+from flask_login import login_user , logout_user , current_user, login_required, current_user
 from dateutil.parser import parse as dateutil_parse
 from flask_yoloapi import endpoint, parameter
 
 import settings
-from funding.factory import app, db_session
+from funding.bin.utils import Summary
+from funding.factory import app, db, cache
 from funding.orm.orm import Proposal, User, Comment
 
 
@@ -27,7 +29,7 @@ def api():
 
 @app.route('/proposal/add/disclaimer')
 def proposal_add_disclaimer():
-    return make_response(render_template(('proposal/disclaimer.html')))
+    return make_response(render_template('proposal/disclaimer.html'))
 
 
 @app.route('/proposal/add')
@@ -79,9 +81,9 @@ def propsal_comment_reply(cid, pid):
 @app.route('/proposal/<int:pid>')
 def proposal(pid):
     p = Proposal.find_by_id(pid=pid)
-    p.get_comments()
     if not p:
         return make_response(redirect(url_for('proposals')))
+    p.get_comments()
     return make_response(render_template(('proposal/proposal.html'), proposal=p))
 
 
@@ -155,9 +157,9 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
         except Exception as ex:
             return make_response(jsonify('letters detected'),500)
         if funds_target < 1:
-                return make_response(jsonify('Proposal asking less than 1 error :)'), 500)
-        if len(addr_receiving) != settings.COIN_ADDRESS_LENGTH:
-            return make_response(jsonify('Faulty address, should be of length 72'), 500)
+            return make_response(jsonify('Proposal asking less than 1 error :)'), 500)
+        if len(addr_receiving) not in settings.COIN_ADDRESS_LENGTH:
+            return make_response(jsonify(f'Faulty address, should be of length: {" or ".join(map(str, settings.COIN_ADDRESS_LENGTH))}'), 500)
 
         p = Proposal(headline=title, content=content, category='misc', user=current_user)
         p.html = html
@@ -167,18 +169,32 @@ def proposal_api_add(title, content, pid, funds_target, addr_receiving, category
         p.category = category
         p.status = status
 
-        db_session.add(p)
-        db_session.commit()
-        db_session.flush()
+        # generate integrated address
+        try:
+            r = requests.get(f'http://{settings.RPC_HOST}:{settings.RPC_PORT}/json_rpc', json={
+                "jsonrpc": "2.0",
+                "id": "0",
+                "method": "make_integrated_address"
+            })
+            r.raise_for_status()
+            blob = r.json()
 
-        p.addr_donation = Proposal.generate_donation_addr(p)
+            assert 'result' in blob
+            assert 'integrated_address' in blob['result']
+            assert 'payment_id' in blob['result']
+        except Exception as ex:
+            raise
 
-    db_session.commit()
-    db_session.flush()
+        p.addr_donation = blob['result']['integrated_address']
+        p.payment_id = blob['result']['payment_id']
 
-    # reset cached statistics
-    from funding.bin.utils import Summary
-    Summary.fetch_stats(purge=True)
+        db.session.add(p)
+
+    db.session.commit()
+    db.session.flush()
+
+    # reset cached stuffz
+    cache.delete('funding_stats')
 
     return make_response(jsonify({'url': url_for('proposal', pid=p.id)}))
 
@@ -189,7 +205,7 @@ def proposal_edit(pid):
     if not p:
         return make_response(redirect(url_for('proposals')))
 
-    return make_response(render_template(('proposal/edit.html'), proposal=p))
+    return make_response(render_template('proposal/edit.html', proposal=p))
 
 
 @app.route('/search')
@@ -205,7 +221,7 @@ def search(key=None):
 
 @app.route('/user/<path:name>')
 def user(name):
-    q = db_session.query(User)
+    q = db.session.query(User)
     q = q.filter(User.username == name)
     user = q.first()
     return render_template('user.html', user=user)
@@ -241,7 +257,9 @@ def proposals(status, page, cat):
 @app.route('/donate')
 def donate():
     from funding.bin.daemon import Daemon
-    from funding.factory import cache, db_session
+    from funding.factory import cache, db
+
+    return "devfund page currently not working :D"
 
     data_default = {'sum': 0, 'txs': []}
     cache_key = 'devfund_txs_in'
@@ -280,6 +298,7 @@ def register():
     try:
         user = User.add(username, password, email)
         flash('Successfully registered. No confirmation email required. You can login!')
+        cache.delete('funding_stats')  # reset cached stuffz
         return redirect(url_for('login'))
     except Exception as ex:
         flash('Could not register user. Probably a duplicate username or email that already exists.', 'error')
