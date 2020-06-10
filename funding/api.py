@@ -1,3 +1,5 @@
+import re
+
 import requests
 from flask import jsonify, send_from_directory, Response
 from flask_yoloapi import endpoint, parameter
@@ -66,28 +68,30 @@ def api_qr_generate(address):
     return send_from_directory('static/qr', '%s.png' % address)
 
 
-@app.route('/api/1/wowlight')
+@app.route('/api/1/wowlite')
 @endpoint.api(
     parameter('version', type=str, location='args', required=True)
 )
-def api_wowlight_version_check(version):
+def api_wowlight_version_check(version: str) -> bool:
     """
-    Checks incoming wowlight wallet version, returns False when the version is
-    too old and needs to be upgraded (due to hard-forks)
+    Checks incoming wow-lite wallet version, returns False when the version is too old and needs to be upgraded.
     :param version:
     :return: bool
     """
-    versions = {
-        '0.1.0': False,
-        '0.1.1': False,
-        '0.1.2': False,
-        '0.1.3': True
-    }
+    url = "https://raw.githubusercontent.com/wownero/wow-lite-wallet/master/src/renderer/components/Landing/LandingPage.vue"
+    try:
+        resp = requests.get(url, headers={"User-Agent": "Mozilla 5.0"})
+        resp.raise_for_status()
+        content = resp.content.decode()
+    except:
+        return True  # default to true
 
-    if version not in versions:
+    # parse latest version
+    current = next(re.finditer(r"wowlite\?version=(\d+.\d+.\d+)", content), None)
+    if not current:
         return False
 
-    return versions[version]
+    return version == current.group(1)
 
 
 @app.route('/api/1/wow/supply')
