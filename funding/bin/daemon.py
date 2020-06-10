@@ -4,7 +4,6 @@ import requests
 from requests.auth import HTTPDigestAuth
 
 import settings
-from funding.orm.orm import User
 
 
 class Daemon:

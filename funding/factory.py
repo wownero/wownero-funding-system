@@ -39,20 +39,15 @@ def _setup_session(app: Flask):
 
 def _setup_db(app: Flask):
     global db
-
-    DB_URL = 'postgresql+psycopg2://{user}:{pw}@{url}/{db}'.format(
+    uri = 'postgresql+psycopg2://{user}:{pw}@{url}/{db}'.format(
         user=settings.PSQL_USER,
         pw=settings.PSQL_PASS,
         url=settings.PSQL_HOST,
         db=settings.PSQL_DB)
-    app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
+    app.config['SQLALCHEMY_DATABASE_URI'] = uri
     db = SQLAlchemy(app)
-
     import funding.orm
-
-    with app.app_context():
-        db.create_all()
-        db.session.commit()
+    db.create_all()
 
 
 def create_app():
@@ -87,7 +82,7 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(_id):
-        from funding.orm.orm import User
+        from funding.orm import User
         return User.query.get(int(_id))
 
     # import routes

@@ -191,14 +191,14 @@ class Proposal(db.Model):
         return {"amount": amount, "pct": pct}
 
     @property
-    @cache.cached(timeout=60, key_prefix="fetch_prices")
+    @cache.cached(timeout=60, make_cache_key=lambda p: f"proposal_balance_{p.id}")
     def balance(self):
         """This property retrieves the current funding status
         of this proposal. It uses Redis cache to not spam the
         daemon too much. Returns a nice dictionary containing
         all relevant proposal funding info"""
         from funding.bin.utils import Summary, coin_to_usd
-        from funding.factory import cache, db
+        from funding.factory import db
         rtn = {'sum': 0.0, 'txs': [], 'pct': 0.0, 'available': 0}
 
         if self.archived:
@@ -263,7 +263,6 @@ class Proposal(db.Model):
 
     @classmethod
     def find_by_args(cls, status: int = None, cat: str = None, limit: int = 20, offset=0):
-        from funding.factory import db
         if isinstance(status, int) and status not in settings.FUNDING_STATUSES.keys():
             raise NotImplementedError('invalid status')
         if isinstance(cat, str) and cat not in settings.FUNDING_CATEGORIES:

@@ -1,9 +1,8 @@
-from datetime import datetime
-from flask import session, g, request
+from flask import request
 import settings
 from funding.bin.utils import Summary
 from funding.factory import app, db
-from funding.orm.orm import Proposal, User, Comment
+from funding.orm import User, Comment
 
 
 @app.context_processor
@@ -39,11 +38,6 @@ def after_request(res):
         res.headers['Expires'] = '0'
         res.headers['Cache-Control'] = 'public, max-age=0'
     return res
-
-
-@app.teardown_appcontext
-def shutdown_session(**kwargs):
-    db.session.remove()
 
 
 @app.errorhandler(404)

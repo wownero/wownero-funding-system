@@ -1,11 +1,7 @@
-import os
-import json
 from datetime import datetime, date
 
-import pyqrcode
 import requests
-from flask import g, request
-from flask.json import JSONEncoder
+from flask import request
 
 import settings
 from funding.factory import cache
@@ -14,7 +10,7 @@ from funding.factory import cache
 def json_encoder(obj):
     if isinstance(obj, (datetime, date)):
         return obj.isoformat()
-    raise TypeError ("Type %s not serializable" % type(obj))
+    raise TypeError("Type %s not serializable" % type(obj))
 
 
 class Summary:
@@ -30,7 +26,7 @@ class Summary:
     @cache.cached(timeout=600, key_prefix="funding_stats")
     def fetch_stats():
         from funding.factory import db
-        from funding.orm.orm import Proposal, User, Comment
+        from funding.orm import Proposal, User
 
         data = {}
         categories = settings.FUNDING_CATEGORIES

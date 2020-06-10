@@ -1,15 +1,14 @@
 from datetime import datetime
 
 import requests
-from flask import request, redirect, Response, abort, render_template, url_for, flash, make_response, send_from_directory, jsonify
-from flask_login import login_user , logout_user , current_user, login_required, current_user
+from flask import request, redirect, render_template, url_for, flash, make_response, send_from_directory, jsonify
+from flask_login import login_user , logout_user , current_user
 from dateutil.parser import parse as dateutil_parse
 from flask_yoloapi import endpoint, parameter
 
 import settings
-from funding.bin.utils import Summary
 from funding.factory import app, db, cache
-from funding.orm.orm import Proposal, User, Comment
+from funding.orm import Proposal, User, Comment
 
 
 @app.route('/')
@@ -65,7 +64,7 @@ def proposal_comment(pid, text, cid):
 
 @app.route('/proposal/<int:pid>/comment/<int:cid>')
 def propsal_comment_reply(cid, pid):
-    from funding.orm.orm import Comment
+    from funding.orm import Comment
     c = Comment.find_by_id(cid)
     if not c or c.replied_to:
         return redirect(url_for('proposal', pid=pid))
@@ -256,9 +255,6 @@ def proposals(status, page, cat):
 
 @app.route('/donate')
 def donate():
-    from funding.bin.daemon import Daemon
-    from funding.factory import cache, db
-
     return "devfund page currently not working :D"
 
     data_default = {'sum': 0, 'txs': []}

@@ -1,12 +1,11 @@
 import requests
-from flask import jsonify, send_from_directory, Response, request
+from flask import jsonify, send_from_directory, Response
 from flask_yoloapi import endpoint, parameter
 
-import settings
 from funding.bin.utils import get_ip
 from funding.bin.qr import QrCodeGenerator
-from funding.factory import app, db
-from funding.orm.orm import Proposal, User
+from funding.factory import app
+from funding.orm import Proposal
 
 
 @app.route('/api/1/proposals')
