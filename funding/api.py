@@ -6,7 +6,7 @@ from flask_yoloapi import endpoint, parameter
 
 from funding.bin.utils import get_ip
 from funding.bin.qr import QrCodeGenerator
-from funding.factory import app
+from funding.factory import app, cache
 from funding.orm import Proposal
 
 
@@ -72,6 +72,7 @@ def api_qr_generate(address):
 @endpoint.api(
     parameter('version', type=str, location='args', required=True)
 )
+@cache.cached(timeout=600 * 6, make_cache_key=lambda version: f"api_wowlight_version_check_{version}")
 def api_wowlight_version_check(version: str) -> bool:
     """
     Checks incoming wow-lite wallet version, returns False when the version is too old and needs to be upgraded.
