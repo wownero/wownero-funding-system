@@ -1,7 +1,8 @@
+import uuid
 from datetime import datetime
 
 import requests
-from flask import request, redirect, render_template, url_for, flash, make_response, send_from_directory, jsonify
+from flask import request, redirect, render_template, url_for, flash, make_response, send_from_directory, jsonify, session
 from flask_login import login_user , logout_user , current_user
 from dateutil.parser import parse as dateutil_parse
 from flask_yoloapi import endpoint, parameter
@@ -301,12 +302,93 @@ def register():
         return make_response(render_template('register.html'))
 
 
+if settings.OPENID_ENABLED:
+    @app.route("/wow-auth/")
+    def wow_auth():
+        assert "state" in request.args
+        assert "session_state" in request.args
+        assert "code" in request.args
+
+        # verify state
+        if not session.get('auth_state'):
+            return "session error", 500
+        if request.args['state'] != session['auth_state']:
+            return "attack detected :)", 500
+
+        # with this authorization code we can fetch an access token
+        url = f"{settings.OPENID_URL}/token"
+        data = {
+            "grant_type": "authorization_code",
+            "code": request.args["code"],
+            "redirect_uri": settings.OPENID_REDIRECT_URI,
+            "client_id": settings.OPENID_CLIENT_ID,
+            "client_secret": settings.OPENID_CLIENT_SECRET,
+            "state": request.args['state']
+        }
+        try:
+            resp = requests.post(url, data=data)
+            resp.raise_for_status()
+        except:
+            return "something went wrong :( #1", 500
+
+        data = resp.json()
+        assert "access_token" in data
+        assert data.get("token_type") == "bearer"
+        access_token = data['access_token']
+
+        # fetch user information with the access token
+        url = f"{settings.OPENID_URL}/userinfo"
+
+        try:
+            resp = requests.post(url, headers={"Authorization": f"Bearer {access_token}"})
+            resp.raise_for_status()
+            user_profile = resp.json()
+        except:
+            return "something went wrong :( #2", 500
+
+        username = user_profile.get("preferred_username")
+        sub = user_profile.get("sub")
+        if not username:
+            return "something went wrong :( #3", 500
+
+        sub_uuid = uuid.UUID(sub)
+        user = User.query.filter_by(username=username).first()
+        if user:
+            if not user.uuid:
+                user.uuid = sub_uuid
+                db.session.commit()
+                db.session.flush()
+        else:
+            user = User.add(username=username,
+                            password=None, email=None, uuid=sub_uuid)
+        login_user(user)
+        response = redirect(request.args.get('next') or url_for('index'))
+        response.headers['X-Set-Cookie'] = True
+        return response
+
+
 @app.route('/login', methods=['GET', 'POST'])
 @endpoint.api(
-    parameter('username', type=str, location='form'),
-    parameter('password', type=str, location='form')
+    parameter('username', type=str, location='form', required=False),
+    parameter('password', type=str, location='form', required=False)
 )
 def login(username, password):
+    if settings.OPENID_ENABLED:
+        state = uuid.uuid4().hex
+        session['auth_state'] = state
+
+        url = f"{settings.OPENID_URL}/auth?" \
+              f"client_id={settings.OPENID_CLIENT_ID}&" \
+              f"redirect_uri={settings.OPENID_REDIRECT_URI}&" \
+              f"response_type=code&" \
+              f"state={state}"
+
+        return redirect(url)
+
+    if not username or not password:
+        flash('Enter username/password pl0x')
+        return make_response(render_template('login.html'))
+
     if request.method == 'GET':
         return make_response(render_template('login.html'))
 
@@ -327,7 +409,6 @@ def logout():
     logout_user()
     response = redirect(request.args.get('next') or url_for('login'))
     response.headers['X-Set-Cookie'] = True
-    flash('Logout successfully')
     return response
 
 

@@ -7,6 +7,7 @@ from sqlalchemy.orm import relationship, backref
 import sqlalchemy as sa
 from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.types import Float
 from sqlalchemy_json import MutableJson
 
@@ -26,11 +27,14 @@ class User(db.Model):
     admin = db.Column(db.Boolean, default=False)
     proposals = relationship('Proposal', back_populates="user")
     comments = relationship("Comment", back_populates="user")
+    uuid = db.Column(UUID(as_uuid=True), unique=True)
 
-    def __init__(self, username, password, email):
+    def __init__(self, username, password, email, uuid=None):
         from funding.factory import bcrypt
         self.username = username
-        self.password = bcrypt.generate_password_hash(password).decode('utf8')
+        if password:
+            self.password = bcrypt.generate_password_hash(password).decode('utf8')
+        self.uuid = uuid
         self.email = email
         self.registered_on = datetime.utcnow()
 
@@ -57,16 +61,17 @@ class User(db.Model):
         return self.username
 
     @classmethod
-    def add(cls, username, password, email):
+    def add(cls, username, password=None, email=None, uuid=None):
         from funding.factory import db
         from funding.validation import val_username, val_email
 
         try:
             # validate incoming username/email
             val_username(username)
-            val_email(email)
+            if email:
+                val_email(email)
 
-            user = User(username, password, email)
+            user = User(username=username, password=password, email=email, uuid=uuid)
             db.session.add(user)
             db.session.commit()
             db.session.flush()

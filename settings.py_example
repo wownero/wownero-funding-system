@@ -14,6 +14,13 @@ PSQL_DB = ''
 PSQL_USER = 'postgres'
 PSQL_PASS = ''
 
+OPENID_ENABLED = False
+OPENID_REALM = "master"
+OPENID_URL = f"https://login.wownero.com/auth/realms/{OPENID_REALM}/protocol/openid-connect"
+OPENID_CLIENT_ID = ""
+OPENID_CLIENT_SECRET = ""
+OPENID_REDIRECT_URI = "http://0.0.0.0:5004/wow-auth/"
+
 SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI', 'postgresql://{user}:{pw}@localhost/{db}').format(user=PSQL_USER, pw=PSQL_PASS, db=PSQL_DB)
 
 SESSION_COOKIE_NAME = os.environ.get('{coincode}_SESSION_COOKIE_NAME', '{coincode}_id').format(coincode=COINCODE.upper())
